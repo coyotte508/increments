@@ -52,6 +52,17 @@ void CliqueNetwork::addLink(const coord &src, CliqueNetwork *nw, const coord &de
     extraLinks[src].insert(QPair<CliqueNetwork*, cl::coord>(nw, dest));
 }
 
+void CliqueNetwork::linkClique(const Clique &c, CliqueNetwork *nw, const Clique &c2)
+{
+    for (int i = 0; i < c.length(); i++) {
+        cl::coord or(i, c[i]);
+
+        for (int j = 0; j < c.length(); j++) {
+            addLink(or, nw, cl::coord(j, c2[i]));
+        }
+    }
+}
+
 Clique CliqueNetwork::randomClique() const
 {
     Clique ret;

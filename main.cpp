@@ -28,7 +28,20 @@ int main(/*int argc, char *argv[]*/)
         copies.push_back(nw);
     }
 
+    CliqueNetworkManager mg;
 
+    CliqueNetwork &nw1 = copies[0];
+    CliqueNetwork &nw2 = copies[1];
+//    CliqueNetwork &nw3 = copies[2];
+//    CliqueNetwork &nw4 = copies[3];
+//    CliqueNetwork &nw5 = copies[4];
+
+    mg.addNetwork(nw1);
+    mg.addNetwork(nw2);
+
+    for (int i = 0; i < 10; i++) {
+        nw1.linkClique(convert.word(i), &nw2, convert.word((i+1)%10));
+    }
 
     return 0;
 }

@@ -31,6 +31,7 @@ public:
     void addClique(const Clique& c);
     void addLink(const cl::coord &src, const cl::coord &dest);
     void addLink(const cl::coord &src, CliqueNetwork *nw, const cl::coord &dest);
+    void linkClique(const Clique &c, CliqueNetwork *nw, const Clique &c2);
     Clique randomClique() const;
     Clique activatedClique() const;
     int cliqueSize() const;
