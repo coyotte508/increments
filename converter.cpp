@@ -111,7 +111,7 @@ QString Converter::gen(int x) const
 
     QString ret;
 
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < x; i++) {
         ret += l[dist(e1)];
     }
 

@@ -21,7 +21,7 @@ public:
     QString word (const QList<Clique> &data, bool sep = false) const;
     int count () const;
     void list() const;
-    QString gen(int x) const;
+    QString gen(int x=4) const;
     QString decomposeWord(const QString &word);
     void learnWord(const QString &word);
 private:

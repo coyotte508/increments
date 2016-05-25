@@ -4,18 +4,9 @@
 
 using namespace std;
 
-int x(int *&y) {
-    y = new int(1);
-    return 0;
-}
 
 int main(/*int argc, char *argv[]*/)
 {
-    int *y;
-    x(y);
-    cout << *y << endl;
-    return 0;
-
     CliqueNetwork nw;
     nw.init(8,256);
 
