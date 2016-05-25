@@ -5,6 +5,10 @@
 #include <QList>
 #include <QString>
 #include <QMap>
+#include <QHash>
+#include <QVariant>
+
+uint qHash(const QVariant &v);
 
 // Seed with a real random value, if available
 static std::random_device r;

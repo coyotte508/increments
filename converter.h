@@ -3,6 +3,7 @@
 
 #include <QList>
 #include <QHash>
+#include <QVariant>
 
 #include "cliquenetwork.h"
 
@@ -14,19 +15,15 @@ public:
     Converter();
 
     QList<QList<int>> cliques() const;
-    QList<QList<int>> cliques (const QString &word, bool forceDec = false); //const;
     QList<QList<int>> cliques (const Clique &cl); //const;
     void associate(const Clique &cl, const QList<Clique> &cls);
-    QString word (const Clique &data) const;
-    QString word (const QList<Clique> &data, bool sep = false) const;
+    QVariant word (const Clique &data) const;
     int count () const;
     void list() const;
-    QString gen(int x=4) const;
-    QString decomposeWord(const QString &word);
-    void learnWord(const QString &word);
+    void learnWord(const QVariant &word, Clique cl = Clique());
 private:
-    QHash<QString, QList<int>> data;
-    QHash<QList<int>, QString> rdata;
+    QHash<QVariant, QList<int>> data;
+    QHash<QList<int>, QVariant> rdata;
     QHash<QList<int>, QList<Clique>> rawdata;
 };
 
