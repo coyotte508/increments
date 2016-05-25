@@ -40,8 +40,10 @@ int main(/*int argc, char *argv[]*/)
     mg.addNetwork(nw2);
 
     for (int i = 0; i < 10; i++) {
-        nw1.linkClique(convert.word(i), &nw2, convert.word((i+1)%10));
+        nw1.linkClique(convert.clique(i), &nw2, convert.clique((i+1)%10));
     }
+
+    cout << "Link of " << 2 << ": " << convert.word(mg.getOutput(nw1, nw2, convert.clique(2))).toInt() << endl;
 
     return 0;
 }

@@ -28,3 +28,11 @@ void CliqueNetworkManager::shutdown()
         nw->shutdown();
     }
 }
+
+Clique CliqueNetworkManager::getOutput(CliqueNetwork &ori, CliqueNetwork &dest, const Clique &inputClique)
+{
+    this->shutdown();
+    ori.activateClique(inputClique);
+    iterate();
+    return dest.activatedClique();
+}

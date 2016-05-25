@@ -42,6 +42,11 @@ QVariant Converter::word(const Clique &data) const
     return rdata.value(data);
 }
 
+Clique Converter::clique(const QVariant &word) const
+{
+    return data.value(word);
+}
+
 int Converter::count() const
 {
     return rdata.count();

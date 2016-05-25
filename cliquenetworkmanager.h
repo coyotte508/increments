@@ -11,6 +11,7 @@ public:
     void addNetwork(CliqueNetwork &nw);
     void iterate();
     void shutdown();
+    Clique getOutput(CliqueNetwork &ori, CliqueNetwork &dest, const Clique &inputClique);
 private:
     QSet<CliqueNetwork *> nws;
 };
