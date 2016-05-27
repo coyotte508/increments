@@ -22,28 +22,22 @@ int main(/*int argc, char *argv[]*/)
         convert.learnWord(i, cl);
     }
 
-    QList<CliqueNetwork> copies;
-
-    for (int i = 0; i < 50; i++) {
-        copies.push_back(nw);
-    }
-
     CliqueNetworkManager mg;
 
-    CliqueNetwork &nw1 = copies[0];
-    CliqueNetwork &nw2 = copies[1];
+    CliqueNetwork *nw1 = new CliqueNetwork(nw);
+    CliqueNetwork *nw2 = new CliqueNetwork(nw);
 //    CliqueNetwork &nw3 = copies[2];
 //    CliqueNetwork &nw4 = copies[3];
 //    CliqueNetwork &nw5 = copies[4];
 
-    mg.addNetwork(nw1);
-    mg.addNetwork(nw2);
+    mg.addNetwork(*nw1);
+    mg.addNetwork(*nw2);
 
-    for (int i = 0; i < 10; i++) {
-        nw1.linkClique(convert.clique(i), &nw2, convert.clique((i+1)%10));
+    for (int i = 0; i < 9; i++) {
+        nw1->linkClique(convert.clique(i), nw2, convert.clique(i+1));
     }
 
-    cout << "Link of " << 2 << ": " << convert.word(mg.getOutput(nw1, nw2, convert.clique(2))).toInt() << endl;
+    cout << "Link of " << 2 << ": " << convert.word(mg.getOutput(*nw1, *nw2, convert.clique(2))).toInt() << endl;
 
     return 0;
 }

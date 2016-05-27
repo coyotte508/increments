@@ -29,6 +29,7 @@ public:
 
     void init(int clusters, int l);
     void addClique(const Clique& c);
+    void removeClique(const Clique &c, bool update=true);
     void addLink(const cl::coord &src, const cl::coord &dest);
     void addLink(const cl::coord &src, CliqueNetwork *nw, const cl::coord &dest);
     void linkClique(const Clique &c, CliqueNetwork *nw, const Clique &c2);
@@ -40,6 +41,7 @@ public:
     void propagate();
     void stabilize();
     void shutdown();
+    void recliques();
 private:
     typedef QMap<int, QSet<cl::coord>> cluster;
     QSet<Clique> cliques;
