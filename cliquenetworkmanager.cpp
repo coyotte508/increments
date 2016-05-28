@@ -5,9 +5,9 @@ CliqueNetworkManager::CliqueNetworkManager()
 
 }
 
-void CliqueNetworkManager::addNetwork(CliqueNetwork &nw)
+void CliqueNetworkManager::addNetwork(CliqueNetwork *nw)
 {
-    nws.insert(&nw);
+    nws.insert(nw);
 }
 
 void CliqueNetworkManager::iterate()
@@ -29,10 +29,10 @@ void CliqueNetworkManager::shutdown()
     }
 }
 
-Clique CliqueNetworkManager::getOutput(CliqueNetwork &ori, CliqueNetwork &dest, const Clique &inputClique)
+Clique CliqueNetworkManager::getOutput(CliqueNetwork *ori, CliqueNetwork *dest, const Clique &inputClique)
 {
     this->shutdown();
-    ori.activateClique(inputClique);
+    ori->activateClique(inputClique);
     iterate();
-    return dest.activatedClique();
+    return dest->activatedClique();
 }

@@ -14,11 +14,13 @@ SOURCES += main.cpp \
     cliquenetworkmanager.cpp \
     tournament.cpp \
     utils.cpp \
-    converter.cpp
+    converter.cpp \
+    cliquemodule.cpp
 
 HEADERS += \
     cliquenetwork.h \
     cliquenetworkmanager.h \
     tournament.h \
     utils.h \
-    converter.h
+    converter.h \
+    cliquemodule.h

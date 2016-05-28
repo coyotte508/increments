@@ -42,6 +42,30 @@ void CliqueNetwork::addClique(const Clique &c)
     cliques.insert(c);
 }
 
+void CliqueNetwork::removeClique(const Clique &c, bool update)
+{
+    if (!cliques.contains(c)) {
+        return;
+    }
+
+    cliques.remove(c);
+
+    if (update) {
+        recliques();
+    }
+}
+
+void CliqueNetwork::recliques()
+{
+    for (int i = 0; i < network.size(); i++) {
+        network[i] = cluster();
+    }
+
+    for (const auto &cl : cliques) {
+        addClique(cl);
+    }
+}
+
 void CliqueNetwork::addLink(const coord &src, const coord &dest)
 {
     network[src.first][src.second].insert(dest);

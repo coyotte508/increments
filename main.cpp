@@ -3,6 +3,7 @@
 #include "cliquenetwork.h"
 #include "converter.h"
 #include "cliquenetworkmanager.h"
+#include "cliquemodule.h"
 
 using namespace std;
 
@@ -22,7 +23,7 @@ int main(/*int argc, char *argv[]*/)
         convert.learnWord(i, cl);
     }
 
-    CliqueNetworkManager mg;
+    CliqueModule mod;
 
     CliqueNetwork *nw1 = new CliqueNetwork(nw);
     CliqueNetwork *nw2 = new CliqueNetwork(nw);
@@ -30,14 +31,14 @@ int main(/*int argc, char *argv[]*/)
 //    CliqueNetwork &nw4 = copies[3];
 //    CliqueNetwork &nw5 = copies[4];
 
-    mg.addNetwork(*nw1);
-    mg.addNetwork(*nw2);
+    mod.addNetwork(nw1);
+    mod.addNetwork(nw2);
 
     for (int i = 0; i < 9; i++) {
-        nw1->linkClique(convert.clique(i), nw2, convert.clique(i+1));
+        mod.linkInputOutput(convert.clique(i), convert.clique(i+1));
     }
 
-    cout << "Link of " << 2 << ": " << convert.word(mg.getOutput(*nw1, *nw2, convert.clique(2))).toInt() << endl;
+    cout << "Link of " << 2 << ": " << convert.word(mod.getOutput(convert.clique(2))).toInt() << endl;
 
     return 0;
 }

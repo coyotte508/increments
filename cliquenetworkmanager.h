@@ -8,11 +8,11 @@ class CliqueNetworkManager
 public:
     CliqueNetworkManager();
 
-    void addNetwork(CliqueNetwork &nw);
+    void addNetwork(CliqueNetwork *nw);
     void iterate();
     void shutdown();
-    Clique getOutput(CliqueNetwork &ori, CliqueNetwork &dest, const Clique &inputClique);
-private:
+    Clique getOutput(CliqueNetwork *ori, CliqueNetwork *dest, const Clique &inputClique);
+protected:
     QSet<CliqueNetwork *> nws;
 };
 
