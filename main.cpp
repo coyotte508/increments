@@ -81,6 +81,11 @@ int main(/*int argc, char *argv[]*/)
 
     intel.addAuxiliaryModule(&mod);
 
+    CliqueModule identity(mod);
+    identity.buildIdentity();
+
+    intel.addAuxiliaryModule(&identity);
+
     intel.resolve();
 
     return 0;

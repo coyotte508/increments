@@ -82,7 +82,7 @@ void CliqueModule::buildIdentity()
 {
     assert(inputs.size() == 1 && outputs.size() == 1);
 
-    for (Clique c : inputs.first()->allCliques()) {
+    for (const Clique &c : inputs.first()->allCliques()) {
         linkInputOutput(c, c);
     }
 }
