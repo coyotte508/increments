@@ -1,8 +1,41 @@
 #include "cliquemodule.h"
+#include <cassert>
 
 CliqueModule::CliqueModule()
 {
 
+}
+
+CliqueModule::CliqueModule(const CliqueModule &other)
+{
+    operator =(other);
+}
+
+CliqueModule &CliqueModule::operator = (const CliqueModule &other)
+{
+    this->ownership = true;
+
+    QHash<CliqueNetwork*,CliqueNetwork*> assoc;
+
+    for (CliqueNetwork *nw : other.nws) {
+        assoc[nw] = new CliqueNetwork(*nw);
+    }
+
+    for (auto x: other.inputs) {
+        inputs.push_back(assoc[x]);
+    }
+    for (auto x: other.outputs) {
+        outputs.push_back(assoc[x]);
+    }
+
+    return *this;
+}
+
+CliqueModule::~CliqueModule() {
+    if (ownership) {
+        qDeleteAll(nws);
+        nws.clear();
+    }
 }
 
 void CliqueModule::addInputNetwork(CliqueNetwork *nw)
@@ -43,4 +76,13 @@ QList<Clique> CliqueModule::getOutputs(const QList<Clique> &inputs)
 void CliqueModule::linkInputOutput(const Clique &input, const Clique &output)
 {
     inputs.first()->linkClique(input, outputs.first(), output);
+}
+
+void CliqueModule::buildIdentity()
+{
+    assert(inputs.size() == 1 && outputs.size() == 1);
+
+    for (Clique c : inputs.first()->allCliques()) {
+        linkInputOutput(c, c);
+    }
 }

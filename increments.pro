@@ -15,7 +15,8 @@ SOURCES += main.cpp \
     tournament.cpp \
     utils.cpp \
     converter.cpp \
-    cliquemodule.cpp
+    cliquemodule.cpp \
+    cliquemoduleintelligence.cpp
 
 HEADERS += \
     cliquenetwork.h \
@@ -23,4 +24,5 @@ HEADERS += \
     tournament.h \
     utils.h \
     converter.h \
-    cliquemodule.h
+    cliquemodule.h \
+    cliquemoduleintelligence.h

@@ -42,6 +42,8 @@ public:
     void stabilize();
     void shutdown();
     void recliques();
+
+    QSet<Clique> allCliques() const {return cliques;}
 private:
     typedef QMap<int, QSet<cl::coord>> cluster;
     QSet<Clique> cliques;
