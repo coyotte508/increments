@@ -10,11 +10,9 @@
 
 uint qHash(const QVariant &v);
 
-// Seed with a real random value, if available
-static std::random_device r;
+void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 
-// Choose a random mean between 1 and 6
-static std::default_random_engine e1(r());
+std::default_random_engine &rng();
 
 QList<int> randomClique(int c, int l);
 

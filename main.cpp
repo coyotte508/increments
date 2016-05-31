@@ -1,4 +1,5 @@
 #include <QCoreApplication>
+#include <QDebug>
 #include <iostream>
 #include "cliquenetwork.h"
 #include "converter.h"
@@ -25,14 +26,15 @@ QList<int> dec(int x, int n) {
     return ret;
 }
 
+Converter convert;
+
 int main(/*int argc, char *argv[]*/)
 {
+    qInstallMessageHandler(myMessageOutput);
     CliqueNetwork nw;
     nw.init(8,256);
 
     QList<Clique> numberCliques;
-
-    Converter convert;
 
     for (int i = 0; i < 10; i++) {
         auto cl = nw.randomClique();
@@ -41,7 +43,8 @@ int main(/*int argc, char *argv[]*/)
         convert.learnWord(i, cl);
     }
 
-    CliqueModule mod;
+    CliqueModule mod("incr");
+    mod.setOwnership(true);
 
     CliqueNetwork *nw1 = new CliqueNetwork(nw);
     CliqueNetwork *nw2 = new CliqueNetwork(nw);
@@ -49,8 +52,8 @@ int main(/*int argc, char *argv[]*/)
 //    CliqueNetwork &nw4 = copies[3];
 //    CliqueNetwork &nw5 = copies[4];
 
-    mod.addNetwork(nw1);
-    mod.addNetwork(nw2);
+    mod.addInputNetwork(nw1);
+    mod.addOutputNetwork(nw2);
 
     for (int i = 0; i < 9; i++) {
         mod.linkInputOutput(convert.clique(i), convert.clique(i+1));
@@ -59,6 +62,7 @@ int main(/*int argc, char *argv[]*/)
     cout << "Link of " << 2 << ": " << convert.word(mod.getOutput(convert.clique(2))).toInt() << endl;
 
     CliqueModule mod2;
+    mod2.setOwnership(true);
     mod2.addInputNetwork( new CliqueNetwork(nw));
     mod2.addInputNetwork( new CliqueNetwork(nw));
     mod2.addOutputNetwork( new CliqueNetwork(nw));
@@ -70,9 +74,10 @@ int main(/*int argc, char *argv[]*/)
     intel.setBaseModel(&mod2);
 
     for (int i = 0; i < 50; i++) {
-        int rnd = dist(e1);
+        int rnd = dist(rng());
         QList<int> input = dec(rnd, 2);
-        QList<int> output = dec(rnd, 2);
+        QList<int> output = dec(rnd+1, 2);
+        qDebug() << input << output;
         QList<Clique> inputs = {convert.clique(input[0]), convert.clique(input[1])};
         QList<Clique> outputs = {convert.clique(output[0]), convert.clique(output[1])};
 
@@ -82,9 +87,17 @@ int main(/*int argc, char *argv[]*/)
     intel.addAuxiliaryModule(&mod);
 
     CliqueModule identity(mod);
+    identity.setName("identity");
     identity.buildIdentity();
 
     intel.addAuxiliaryModule(&identity);
+
+    for (int i = 0; i < 10; i++) {
+        CliqueModule *target = new CliqueModule(mod);
+        target->setName("target" + QString::number(i));
+        target->buildTarget(convert.clique(i));
+        intel.addAuxiliaryModule(target);
+    }
 
     intel.resolve();
 

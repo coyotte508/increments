@@ -93,7 +93,7 @@ Clique CliqueNetwork::randomClique() const
 
     std::uniform_int_distribution<> f(0,l-1);
     for (int i = 0; i < c; i++) {
-        ret.push_back(f(e1));
+        ret.push_back(f(rng()));
     }
 
     return ret;

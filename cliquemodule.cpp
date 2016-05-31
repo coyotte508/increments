@@ -1,7 +1,7 @@
 #include "cliquemodule.h"
 #include <cassert>
 
-CliqueModule::CliqueModule()
+CliqueModule::CliqueModule(const QString &name) : m_Name(name)
 {
 
 }
@@ -27,6 +27,9 @@ CliqueModule &CliqueModule::operator = (const CliqueModule &other)
     for (auto x: other.outputs) {
         outputs.push_back(assoc[x]);
     }
+    for (auto x: other.nws) {
+        nws.insert(assoc[x]);
+    }
 
     return *this;
 }
@@ -48,6 +51,11 @@ void CliqueModule::addOutputNetwork(CliqueNetwork *nw)
 {
     addNetwork(nw);
     outputs.push_back(nw);
+}
+
+void CliqueModule::setOwnership(bool ownership)
+{
+    this->ownership = ownership;
 }
 
 Clique CliqueModule::getOutput(const Clique &input)
@@ -84,5 +92,14 @@ void CliqueModule::buildIdentity()
 
     for (const Clique &c : inputs.first()->allCliques()) {
         linkInputOutput(c, c);
+    }
+}
+
+void CliqueModule::buildTarget(const Clique &target)
+{
+    assert(inputs.size() == 1 && outputs.size() == 1);
+
+    for (const Clique &c : inputs.first()->allCliques()) {
+        linkInputOutput(c, target);
     }
 }

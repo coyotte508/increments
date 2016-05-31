@@ -7,11 +7,12 @@
 
 typedef QList<int> Clique;
 
-inline uint qHash(const QList<int> &key, uint seed = 0)
+template <class T>
+inline uint qHash(const QList<T> &key, uint seed = 0)
 {
     uint current = 0;
-    for (int i : key) {
-        current = qHash(QPair<int,int>(current, i), seed);
+    for (const T & val : key) {
+        current = qHash(QPair<int,T>(current, val), seed);
     }
 
     return current;

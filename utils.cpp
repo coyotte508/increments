@@ -1,5 +1,52 @@
 #include "utils.h"
 
+#include <QMessageLogContext>
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+// Seed with a real random value, if available
+static std::random_device r;
+
+// Choose a random mean between 1 and 6
+static std::default_random_engine e1(r());
+
+static bool seeded = false;
+
+std::default_random_engine & rng() {
+    if (!seeded) {
+        e1.seed(time(nullptr));
+    }
+    seeded = true;
+    return e1;
+}
+
+void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+{
+    QByteArray localMsg = msg.toLocal8Bit();
+    switch (type) {
+//    case QtDebugMsg:
+//        fprintf(stderr, "Debug: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+//        break;
+//    case QtInfoMsg:
+//        fprintf(stderr, "Info: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+//        break;
+//    case QtWarningMsg:
+//        fprintf(stderr, "Warning: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+//        break;
+//    case QtCriticalMsg:
+//        fprintf(stderr, "Critical: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+//        break;
+    case QtFatalMsg:
+        fprintf(stderr, "Fatal: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+        abort();
+    default:;
+    }
+
+    fprintf(stderr, "Debug: %s \n", localMsg.constData());
+}
+
 uint qHash( const QVariant & var )
 {
     if ( !var.isValid() || var.isNull() )
