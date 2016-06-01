@@ -66,6 +66,19 @@ void CliqueNetwork::recliques()
     }
 }
 
+bool CliqueNetwork::isFullyConnectedTo(const Clique &input, CliqueNetwork *dest, const Clique &output) const
+{
+    for (int i = 0; i < input.size(); i++) {
+        for (int j = 0; j < output.size(); j++) {
+            if (!extraLinks.value(cl::coord(i, input[i])).contains(destlink(dest, cl::coord(j, output[j])))) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
 void CliqueNetwork::addLink(const coord &src, const coord &dest)
 {
     network[src.first][src.second].insert(dest);

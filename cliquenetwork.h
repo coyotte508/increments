@@ -24,6 +24,7 @@ namespace cl {
 
 class CliqueNetwork
 {
+    typedef QPair<CliqueNetwork*, cl::coord> destlink;
 public:
     CliqueNetwork();
     CliqueNetwork(const CliqueNetwork &other);
@@ -44,12 +45,14 @@ public:
     void shutdown();
     void recliques();
 
+    bool isFullyConnectedTo(const Clique &input, CliqueNetwork *dest, const Clique &output) const;
+
     QSet<Clique> allCliques() const {return cliques;}
 private:
     typedef QMap<int, QSet<cl::coord>> cluster;
     QSet<Clique> cliques;
     QList<cluster> network;
-    QMap<cl::coord, QSet<QPair<CliqueNetwork*, cl::coord>>> extraLinks;
+    QMap<cl::coord, QSet<destlink>> extraLinks;
     Clique activated;
     QMap<cl::coord, int> stimulated;
     int l = 0;

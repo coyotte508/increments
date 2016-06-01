@@ -44,6 +44,40 @@ void CliqueModuleIntelligence::resolve()
         qDebug() << key;
         qDebug() << results[key].size() << " matches";
     }
+
+    //Get the best results possibles
+    QSet<int> indexes;
+
+    for (int i = 0; i < dataset.size(); i++) {
+        indexes << i;
+    }
+
+    QList<TransformationSet> winners;
+    int i = 0;
+    while (indexes.size() > 0) {
+        TransformationSet winner;
+        int max = 0;
+        i++;
+
+        for (const TransformationSet &key : results.keys()) {
+            int count = results[key].intersect(indexes).count();
+
+            if (count > max) {
+                max = count;
+                winner = key;
+            }
+        }
+
+        qDebug() << "Winner #" << i << " " << winner << ": " << results[winner].size();
+
+        indexes.subtract(results[winner]);
+
+        for (int remaining : indexes) {
+            const auto &in = dataset[remaining].first;
+            const auto &out = dataset[remaining].second;
+            qDebug() << convert.word(in[0]).toInt() << convert.word(in[1]).toInt() << " -> " << convert.word(out[0]).toInt() << convert.word(out[1]).toInt();
+        }
+    }
 }
 
 void CliqueModuleIntelligence::processDataSet(int index)
