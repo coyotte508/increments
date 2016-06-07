@@ -14,7 +14,6 @@ CliqueModule::CliqueModule(const CliqueModule &other)
 CliqueModule &CliqueModule::operator = (const CliqueModule &other)
 {
     this->ownership = true;
-    this->isTarget = other.isTarget;
 
     QHash<CliqueNetwork*,CliqueNetwork*> assoc;
 
@@ -62,7 +61,14 @@ void CliqueModule::setOwnership(bool ownership)
 Clique CliqueModule::getOutput(const Clique &input)
 {
     /* No safety checks done. Assumes reponsible caller */
-    return CliqueNetworkManager::getOutput(inputs.first(), outputs.first(), input);
+    auto cl = CliqueNetworkManager::getOutput(inputs.first(), outputs.first(), input);
+
+    if (destinationModules.contains(cl)) {
+        /* Possible infinite recursion */
+        cl = destinationModules[cl]->getOutput(input);
+    }
+
+    return cl;
 }
 
 QList<Clique> CliqueModule::getOutputs(const QList<Clique> &inputs)
@@ -112,6 +118,17 @@ QList<Clique> CliqueModule::analyzeOutput(const Clique &input)
     return ret;
 }
 
+Clique CliqueModule::addDestinationModule(CliqueModule *module)
+{
+    auto output = outputs.first();
+    auto cl = output->randomClique();
+
+    output->addClique(cl);
+    destinationModules[cl] = module;
+
+    return cl;
+}
+
 void CliqueModule::linkInputOutput(const Clique &input, const Clique &output)
 {
     inputs.first()->linkClique(input, outputs.first(), output);
@@ -134,5 +151,5 @@ void CliqueModule::buildTarget(const Clique &target)
         linkInputOutput(c, target);
     }
 
-    isTarget = true;
+    _isTarget = true;
 }

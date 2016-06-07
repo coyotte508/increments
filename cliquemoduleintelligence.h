@@ -22,6 +22,10 @@ namespace cl {
         bool operator == (const Transformation &other) const {
             return inputs == other.inputs && outputs == other.outputs && module == other.module;
         }
+
+        bool matchInputsOutputs(const Transformation &other) const {
+            return inputs == other.inputs && outputs == other.outputs;
+        }
     };
 
     typedef QList<Transformation> TransformationSet;
@@ -50,7 +54,7 @@ public:
     void setBaseModel(CliqueModule *mod);
     void addAuxiliaryModule(CliqueModule *mod);
     void addInputOutput(const input &in, const output &out);
-
+    void mergeTargets( QList<cl::TransformationSet> &winners);
     void resolve();
     void collate();
 protected:
