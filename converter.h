@@ -18,6 +18,7 @@ public:
     QList<QList<int>> cliques (const Clique &cl); //const;
     void associate(const Clique &cl, const QList<Clique> &cls);
     QVariant word (const Clique &data) const;
+    QVariantList words (const QList<Clique> &data) const;
     Clique clique(const QVariant &word) const;
     int count () const;
     void list() const;

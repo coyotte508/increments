@@ -68,6 +68,10 @@ void CliqueModuleIntelligence::resolve()
         i++;
 
         for (const TransformationSet &key : results.keys()) {
+            //Do not effect results of already stored winners
+            if (winners.contains(key)) {
+                continue;
+            }
             int count = results[key].intersect(indexes).count();
 
             if (count > max) {
@@ -83,7 +87,7 @@ void CliqueModuleIntelligence::resolve()
         for (int remaining : indexes) {
             const auto &in = dataset[remaining].first;
             const auto &out = dataset[remaining].second;
-            qDebug() << convert.word(in[0]).toInt() << convert.word(in[1]).toInt() << " -> " << convert.word(out[0]).toInt() << convert.word(out[1]).toInt();
+            qDebug() << convert.words(in) << " -> " << convert.words(out);
         }
 
         winners.push_back(winner);
@@ -93,8 +97,33 @@ void CliqueModuleIntelligence::resolve()
     mergeTargets(winners);
 }
 
+void CliqueModuleIntelligence::clearData()
+{
+    dataset.clear();
+    results.clear();
+}
+
+CliqueModule *CliqueModuleIntelligence::popModule()
+{
+    if (newModules.empty()) {
+        return nullptr;
+    }
+
+    return newModules.takeFirst();
+}
+
+QList<CliqueModule*> CliqueModuleIntelligence::getNewModules()
+{
+    QList<CliqueModule*> ret;
+    ret.swap(newModules);
+
+    return ret;
+}
+
 void CliqueModuleIntelligence::mergeTargets(QList<TransformationSet> &winners)
 {
+    qDebug() << "merging target";
+
     /* Try to rebuild target types */
     while (1) {
         /* We'll try to merge everything into firstTarget */
@@ -118,7 +147,8 @@ outloop:
         locations.insert(QPair<int,int>(firstTarget, indice));
 
         auto logInputs = [&](int index, const cl::Transformation &t) {
-            auto dataset = results[winners[index]];
+            auto winner = winners[index];
+            auto dataset = results[winner];
 
             assert(t.inputs.size() == 1);
             assert(t.outputs.size() == 1);
@@ -137,7 +167,7 @@ outloop:
 
             for (int i: dataset) {
                 auto key = this->dataset[i].first[t.inputs[0]];
-                auto val = this->dataset[i].second[t.outputs[1]];
+                auto val = this->dataset[i].second[t.outputs[0]];
 
                 if (recordedInputs.value(key, val) != val) {
                     return false;
@@ -167,20 +197,23 @@ outloop:
         }
 
         /* Merge 'em for real */
-        if (locations.values().toSet().size() <= 1) {
+        if (recordedInputs.values().toSet().size() <= 1) {
             /* All targets pointing to same location, then they should keep being as they are */
             break;
         }
 
         CliqueModule *disciple = new CliqueModule(*baseModule);
+        disciple->setName(QString("internal%1").arg(auxiliaryModules.size()));
 
         for (const Clique &c: recordedInputs.keys()) {
             disciple->linkInputOutput(c, recordedInputs[c]);
         }
 
         //Todo: check it's not already in the disciples?
+        qDebug() << "adding new module";
 
         auxiliaryModules.insert(disciple);
+        newModules.push_back(disciple);
 
         /* Update the results by merging now-identical transformation sets */
         for (const QPair<int, int> &location : locations) {
@@ -200,7 +233,7 @@ void CliqueModuleIntelligence::processDataSet(int index)
 
     QSet<TransformationSet> sets;
 
-    qDebug() << convert.word(in[0]) << convert.word(in[1]) << " -> " << convert.word(out[0]) << convert.word(out[1]);
+    qDebug() << convert.words(in) << " -> " << convert.words(out);
 
     std::function<void(int, const TransformationSet&)> rec
             = [&rec, &sets, index, &out, &in, this] (int j, const TransformationSet &current) {

@@ -54,17 +54,22 @@ public:
     void setBaseModel(CliqueModule *mod);
     void addAuxiliaryModule(CliqueModule *mod);
     void addInputOutput(const input &in, const output &out);
-    void mergeTargets( QList<cl::TransformationSet> &winners);
+
     void resolve();
     void collate();
+    void clearData();
+
+    CliqueModule *popModule();
+    QList<CliqueModule*> getNewModules();
 protected:
     void processDataSet(int index);
-
+    void mergeTargets( QList<cl::TransformationSet> &winners);
 private:
     QList<inputoutput> dataset;
     CliqueModule base;
 
     QSet<CliqueModule *> auxiliaryModules;
+    QList<CliqueModule *> newModules;
 
     QHash<cl::TransformationSet, QSet<int>> results;
 };

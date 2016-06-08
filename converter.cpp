@@ -42,6 +42,16 @@ QVariant Converter::word(const Clique &data) const
     return rdata.value(data);
 }
 
+QVariantList Converter::words(const QList<Clique> &data) const
+{
+    QVariantList ret;
+
+    for (const auto &cl: data) {
+        ret << word(cl);
+    }
+
+    return ret;
+}
 Clique Converter::clique(const QVariant &word) const
 {
     return data.value(word);
