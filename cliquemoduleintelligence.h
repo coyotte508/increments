@@ -63,7 +63,10 @@ public:
     QList<CliqueModule*> getNewModules();
 protected:
     void processDataSet(int index);
-    void mergeTargets( QList<cl::TransformationSet> &winners);
+    void mergeTargets(QList<cl::TransformationSet> &winners);
+    void updateResults();
+    void trimResults(const QList<cl::TransformationSet> &winners); //trim results to only what's necessary
+    QList<cl::TransformationSet> winners();
 private:
     QList<inputoutput> dataset;
     CliqueModule base;

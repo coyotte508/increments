@@ -42,9 +42,7 @@ void CliqueModuleIntelligence::resolve()
         return;
     }
 
-    for (int i = 0; i < dataset.size(); i++) {
-        processDataSet(i);
-    }
+    updateResults();
 
     qDebug() << "There are " << results.size() << "results.";
 
@@ -54,6 +52,56 @@ void CliqueModuleIntelligence::resolve()
     }
 
     //Get the best results possibles
+    auto winners = this->winners();
+
+    /* Try to merge multiple "constant functions" into a bigger one */
+    trimResults(winners);
+    mergeTargets(winners);
+}
+
+void CliqueModuleIntelligence::collate()
+{
+    /* Todo: find way of collating different winners by testing the input and going in the right direction */
+    updateResults(); //in case of merged targets, rerun the results with new modules
+
+    auto winners = this->winners();
+    trimResults(winners);//necessary?
+
+    /* Todo: find a network that can test which one */
+    QList<QSet<int> > inputs;
+    for (const auto &winner : winners) {
+        inputs.push_back(results[winner]);
+    }
+
+    //We now have our sets of inputs.
+    //How to create a test function that separates them well?
+}
+
+void CliqueModuleIntelligence::updateResults()
+{
+    results.clear();
+
+    for (int i = 0; i < dataset.size(); i++) {
+        processDataSet(i);
+    }
+}
+
+void CliqueModuleIntelligence::trimResults(const QList<cl::TransformationSet> &winners)
+{
+    QSet<int> indexes;
+
+    for (int i = 0; i < dataset.size(); i++) {
+        indexes << i;
+    }
+
+    for (const auto winner: winners) {
+        results[winner].intersect(indexes);
+        indexes.subtract(results[winner]);
+    }
+}
+
+QList<cl::TransformationSet> CliqueModuleIntelligence::winners()
+{
     QSet<int> indexes;
 
     for (int i = 0; i < dataset.size(); i++) {
@@ -61,6 +109,8 @@ void CliqueModuleIntelligence::resolve()
     }
 
     QList<TransformationSet> winners;
+    auto results = this->results;
+
     int i = 0;
     while (indexes.size() > 0) {
         TransformationSet winner;
@@ -68,10 +118,6 @@ void CliqueModuleIntelligence::resolve()
         i++;
 
         for (const TransformationSet &key : results.keys()) {
-            //Do not effect results of already stored winners
-            if (winners.contains(key)) {
-                continue;
-            }
             int count = results[key].intersect(indexes).count();
 
             if (count > max) {
@@ -93,8 +139,7 @@ void CliqueModuleIntelligence::resolve()
         winners.push_back(winner);
     }
 
-    /* Try to merge multiple "constant functions" into a bigger one */
-    mergeTargets(winners);
+    return winners;
 }
 
 void CliqueModuleIntelligence::clearData()

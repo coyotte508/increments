@@ -14,6 +14,7 @@ CliqueModule::CliqueModule(const CliqueModule &other)
 CliqueModule &CliqueModule::operator = (const CliqueModule &other)
 {
     this->ownership = true;
+    this->_isTarget = false;
 
     QHash<CliqueNetwork*,CliqueNetwork*> assoc;
 
