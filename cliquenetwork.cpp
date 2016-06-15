@@ -32,6 +32,21 @@ void CliqueNetwork::init(int clusters, int l)
     this->c = clusters;
 }
 
+void CliqueNetwork::copyAdd(const CliqueNetwork &other)
+{
+    if (!l) {
+        init(other.c, other.l);
+    }
+
+    cliques.unite(other.cliques);
+
+    for (int i = 0; i < other.network.size(); i++) {
+        for (int j : other.network[i].keys()) {
+            network[i][j].unite(other.network[i][j]);
+        }
+    }
+}
+
 void CliqueNetwork::addClique(const Clique &c)
 {
     for (int i = 0; i < c.size(); i++) {
@@ -87,6 +102,13 @@ void CliqueNetwork::addLink(const coord &src, const coord &dest)
 void CliqueNetwork::addLink(const coord &src, CliqueNetwork *nw, const coord &dest)
 {
     extraLinks[src].insert(QPair<CliqueNetwork*, cl::coord>(nw, dest));
+}
+
+void CliqueNetwork::buildIdentity(CliqueNetwork *other)
+{
+    for (const auto &cl : cliques) {
+        linkClique(cl, other, cl);
+    }
 }
 
 void CliqueNetwork::linkClique(const Clique &c, CliqueNetwork *nw, const Clique &c2)

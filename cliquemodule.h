@@ -15,6 +15,8 @@ public:
 
     void addInputNetwork(CliqueNetwork *nw);
     void addOutputNetwork(CliqueNetwork *nw);
+    CliqueNetwork *getInputNetwork(int i) const;
+    CliqueNetwork *getOutputNetwork(int i) const;
 
     void setOwnership(bool ownership);
 
@@ -26,7 +28,9 @@ public:
     QList<Clique> analyzeInput(const Clique &output);
     QList<Clique> analyzeOutput(const Clique &input);
 
+    void addModule(CliqueModule *module, QList<int> ins, QList<int> outs);
     Clique addDestinationModule(CliqueModule *module);
+    void addDestinationModule(CliqueModule *module, const Clique &c);
     void linkInputOutput(const Clique &input, const Clique &output);
     void buildIdentity();
     void buildTarget(const Clique &dest);

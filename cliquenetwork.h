@@ -30,10 +30,12 @@ public:
     CliqueNetwork(const CliqueNetwork &other);
 
     void init(int clusters, int l);
+    void copyAdd(const CliqueNetwork &other);
     void addClique(const Clique& c);
     void removeClique(const Clique &c, bool update=true);
     void addLink(const cl::coord &src, const cl::coord &dest);
     void addLink(const cl::coord &src, CliqueNetwork *nw, const cl::coord &dest);
+    void buildIdentity(CliqueNetwork *other);
     void linkClique(const Clique &c, CliqueNetwork *nw, const Clique &c2);
     Clique randomClique() const;
     Clique activatedClique() const;

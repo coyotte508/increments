@@ -10,6 +10,48 @@ using namespace cl;
 
 extern Converter convert;
 
+CliqueModule* cl::TransformationSet::createModule()
+{
+    CliqueModule *module = new CliqueModule();
+    QMap<int, CliqueNetwork*> inputs;
+    QMap<int, CliqueNetwork*> outputs;
+
+    for (const Transformation& t: *this) {
+        for (int i = 0; i < t.inputs.size(); i++) {
+            int key = t.inputs[i];
+            CliqueNetwork *ori = t.module->getInputNetwork(i);
+            if (!inputs.contains(key)) {
+                inputs[key] = new CliqueNetwork();
+            }
+            inputs[key]->copyAdd(*ori);
+        }
+        for (int i = 0; i < t.outputs.size(); i++) {
+            int key = t.outputs[i];
+            CliqueNetwork *ori = t.module->getOutputNetwork(i);
+            if (!outputs.contains(key)) {
+                outputs[key] = new CliqueNetwork();
+            }
+            outputs[key]->copyAdd(*ori);
+        }
+    }
+
+    assert(inputs.key(inputs.first()) == 0 && inputs.key(inputs.last()) == inputs.size() -1);
+    assert(outputs.key(outputs.first()) == 0 && outputs.key(outputs.last()) == outputs.size() -1);
+
+    for (CliqueNetwork *c : inputs.values()) {
+        module->addInputNetwork(c);
+    }
+    for (CliqueNetwork *c : outputs.values()) {
+        module->addOutputNetwork(c);
+    }
+
+    for (const Transformation &t: *this) {
+        module->addModule(t.module, t.inputs, t.outputs);
+    }
+
+    return module;
+}
+
 QDebug operator << (QDebug stream, const Transformation &t) {
     stream << t.inputs << " " << t.module->name() << " " << t.outputs;
     return stream;
@@ -73,8 +115,27 @@ void CliqueModuleIntelligence::collate()
         inputs.push_back(results[winner]);
     }
 
-    //We now have our sets of inputs.
+    if (winners.size() == 1 && winners[0].size() == 1) {
+        return; //abosutely nothing to do
+    }
+
+    QList<CliqueModule *> modules;
+    /* First merge winners into one module */
+    for (const auto &winner : winners) {
+        CliqueModule *module = winner.createModule();
+        addAuxiliaryModule(module);
+        modules.push_back(module);
+    }
+
+    /* No need to collate inputs if only one solution */
+    if (inputs.size() == 1) {
+        return;
+    }
+
+    //We now have our sets of inputs, and corresponding modules
     //How to create a test function that separates them well?
+    CliqueModule *cm = new CliqueModule(base);
+    cm->addDestinationModule();
 }
 
 void CliqueModuleIntelligence::updateResults()

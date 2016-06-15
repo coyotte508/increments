@@ -28,7 +28,10 @@ namespace cl {
         }
     };
 
-    typedef QList<Transformation> TransformationSet;
+    class TransformationSet : public QList<Transformation> {
+    public:
+        CliqueModule *createModule();
+    };
     typedef QPair<QSet<int>, QSet<int>> Results;
 }
 

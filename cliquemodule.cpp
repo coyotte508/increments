@@ -54,6 +54,16 @@ void CliqueModule::addOutputNetwork(CliqueNetwork *nw)
     outputs.push_back(nw);
 }
 
+CliqueNetwork *CliqueModule::getInputNetwork(int i) const
+{
+    return inputs[i];
+}
+
+CliqueNetwork *CliqueModule::getOutputNetwork(int i) const
+{
+    return outputs[i];
+}
+
 void CliqueModule::setOwnership(bool ownership)
 {
     this->ownership = ownership;
@@ -119,6 +129,20 @@ QList<Clique> CliqueModule::analyzeOutput(const Clique &input)
     return ret;
 }
 
+void CliqueModule::addModule(CliqueModule *module, QList<int> ins, QList<int> outs)
+{
+    for (CliqueNetwork *nw : module->nws) {
+        addNetwork(nw);
+    }
+
+    for (int i = 0; i < ins.size(); i++) {
+        getInputNetwork(ins[i])->buildIdentity(module->getInputNetwork(i));
+    }
+    for (int i = 0; i < outs.size(); i++) {
+        module->getOutputNetwork(i)->buildIdentity(getOutputNetwork(outs[i]));
+    }
+}
+
 Clique CliqueModule::addDestinationModule(CliqueModule *module)
 {
     auto output = outputs.first();
@@ -128,6 +152,12 @@ Clique CliqueModule::addDestinationModule(CliqueModule *module)
     destinationModules[cl] = module;
 
     return cl;
+}
+
+void CliqueModule::addDestinationModule(CliqueModule *module, const Clique &cl)
+{
+    outputs.first()->addClique(cl);
+    destinationModules[cl] = module;
 }
 
 void CliqueModule::linkInputOutput(const Clique &input, const Clique &output)
