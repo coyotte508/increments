@@ -80,7 +80,9 @@ int main(/*int argc, char *argv[]*/)
     auto module = intel.popModule();
     assert(module);
 
-    cout << "Link of " << 2 << ": " << convert.word(module->getOutput(convert.clique(2))).toInt() << endl;
+    for (int i = 0; i < 9; i++) {
+        cout << "Link of " << i << ": " << convert.word(module->getOutput(convert.clique(i))).toInt() << endl;
+    }
 
     CliqueModule mod2;
     mod2.setOwnership(true);
@@ -98,7 +100,7 @@ int main(/*int argc, char *argv[]*/)
         int rnd = dist(rng());
         QList<int> input = dec(rnd, 2);
         QList<int> output = dec(rnd+1, 2);
-        qDebug() << input << output;
+        //qDebug() << input << output;
         QList<Clique> inputs = {convert.clique(input[0]), convert.clique(input[1])};
         QList<Clique> outputs = {convert.clique(output[0]), convert.clique(output[1])};
 
@@ -106,6 +108,7 @@ int main(/*int argc, char *argv[]*/)
     }
 
     intel.resolve();
+    intel.collate();
 
     return 0;
 }

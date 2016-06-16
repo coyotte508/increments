@@ -16,6 +16,8 @@ std::default_random_engine &rng();
 
 QList<int> randomClique(int c, int l);
 
+QList<int> toInt(const QList<QVariant> &l);
+
 QString debug(const QMap<int, int> &histo);
 
 #endif // UTILS_H

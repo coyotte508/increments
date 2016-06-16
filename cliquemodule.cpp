@@ -1,5 +1,6 @@
 #include "cliquemodule.h"
 #include <cassert>
+#include <QDebug>
 
 CliqueModule::CliqueModule(const QString &name) : m_Name(name)
 {
@@ -89,7 +90,11 @@ QList<Clique> CliqueModule::getOutputs(const QList<Clique> &inputs)
     shutdown();
 
     for (int i = 0; i < inputs.size(); i++) {
-        this->inputs[i]->activateClique(inputs[i]);
+        if (this->inputs.size() > i && !this->inputs[i]->isEmpty()) {
+            this->inputs[i]->activateClique(inputs[i]);
+        } else {
+            qDebug() << "Ignore input " << i;
+        }
     }
     iterate();
     for (auto output : outputs) {
@@ -158,6 +163,13 @@ void CliqueModule::addDestinationModule(CliqueModule *module, const Clique &cl)
 {
     outputs.first()->addClique(cl);
     destinationModules[cl] = module;
+}
+
+void CliqueModule::clearOutputCliques()
+{
+    for (auto nw : outputs) {
+        nw->clear();
+    }
 }
 
 void CliqueModule::linkInputOutput(const Clique &input, const Clique &output)

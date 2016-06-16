@@ -1,5 +1,5 @@
 #include <QVector>
-
+#include <QDebug>
 
 #include "utils.h"
 #include "cliquenetwork.h"
@@ -47,6 +47,11 @@ void CliqueNetwork::copyAdd(const CliqueNetwork &other)
     }
 }
 
+void CliqueNetwork::clear()
+{
+    cliques.clear();
+}
+
 void CliqueNetwork::addClique(const Clique &c)
 {
     for (int i = 0; i < c.size(); i++) {
@@ -79,6 +84,11 @@ void CliqueNetwork::recliques()
     for (const auto &cl : cliques) {
         addClique(cl);
     }
+}
+
+bool CliqueNetwork::isEmpty() const
+{
+    return l == 0 || c == 0 || cliques.size() == 0;
 }
 
 bool CliqueNetwork::isFullyConnectedTo(const Clique &input, CliqueNetwork *dest, const Clique &output) const

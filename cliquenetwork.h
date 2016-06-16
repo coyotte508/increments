@@ -31,6 +31,7 @@ public:
 
     void init(int clusters, int l);
     void copyAdd(const CliqueNetwork &other);
+    void clear(); // only remove local cliques
     void addClique(const Clique& c);
     void removeClique(const Clique &c, bool update=true);
     void addLink(const cl::coord &src, const cl::coord &dest);
@@ -47,6 +48,7 @@ public:
     void shutdown();
     void recliques();
 
+    bool isEmpty() const;
     bool isFullyConnectedTo(const Clique &input, CliqueNetwork *dest, const Clique &output) const;
 
     QSet<Clique> allCliques() const {return cliques;}

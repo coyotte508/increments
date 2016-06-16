@@ -30,7 +30,8 @@ namespace cl {
 
     class TransformationSet : public QList<Transformation> {
     public:
-        CliqueModule *createModule();
+        CliqueModule *createModule() const;
+        QList<Clique> transform(const QList<Clique> &in);
     };
     typedef QPair<QSet<int>, QSet<int>> Results;
 }
@@ -48,6 +49,7 @@ inline uint qHash(const cl::Transformation &key, uint seed)
 
 class CliqueModuleIntelligence {
 public:
+
     typedef QList<Clique> input;
     typedef QList<Clique> output;
     typedef QPair<input, output> inputoutput;
@@ -64,6 +66,8 @@ public:
 
     CliqueModule *popModule();
     QList<CliqueModule*> getNewModules();
+
+    const input& getInput(int index) const;
 protected:
     void processDataSet(int index);
     void mergeTargets(QList<cl::TransformationSet> &winners);

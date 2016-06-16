@@ -128,6 +128,17 @@ QList<int> randomClique(int c, int l)
     return ret;
 }
 
+QList<int> toInt(const QList<QVariant> &l)
+{
+    QList<int> ret;
+
+    for (auto x: l) {
+        ret << x.toInt();
+    }
+
+    return ret;
+}
+
 QString debug(const QMap<int, int> &histo)
 {
     QString ret;

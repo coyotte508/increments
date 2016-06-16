@@ -16,7 +16,9 @@ SOURCES += main.cpp \
     utils.cpp \
     converter.cpp \
     cliquemodule.cpp \
-    cliquemoduleintelligence.cpp
+    cliquemoduleintelligence.cpp \
+    classifier.cpp \
+    testmodule.cpp
 
 HEADERS += \
     cliquenetwork.h \
@@ -25,4 +27,6 @@ HEADERS += \
     utils.h \
     converter.h \
     cliquemodule.h \
-    cliquemoduleintelligence.h
+    cliquemoduleintelligence.h \
+    classifier.h \
+    testmodule.h

@@ -21,7 +21,7 @@ public:
     void setOwnership(bool ownership);
 
     Clique getOutput(const Clique &input);
-    QList<Clique> getOutputs(const QList<Clique> &inputs);
+    virtual QList<Clique> getOutputs(const QList<Clique> &inputs);
 
     /* More costly functions which will determine which cliques are connected
      * to a specific input or output exactly */
@@ -31,6 +31,7 @@ public:
     void addModule(CliqueModule *module, QList<int> ins, QList<int> outs);
     Clique addDestinationModule(CliqueModule *module);
     void addDestinationModule(CliqueModule *module, const Clique &c);
+    void clearOutputCliques();
     void linkInputOutput(const Clique &input, const Clique &output);
     void buildIdentity();
     void buildTarget(const Clique &dest);

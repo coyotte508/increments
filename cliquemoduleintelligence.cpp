@@ -1,7 +1,10 @@
 #include <functional>
 #include <cassert>
 #include "cliquemoduleintelligence.h"
+#include "testmodule.h"
 #include "converter.h"
+#include "classifier.h"
+#include "utils.h"
 
 //Needs to be below sadly due to qHash redefinition
 #include <QDebug>
@@ -10,7 +13,7 @@ using namespace cl;
 
 extern Converter convert;
 
-CliqueModule* cl::TransformationSet::createModule()
+CliqueModule* cl::TransformationSet::createModule() const
 {
     CliqueModule *module = new CliqueModule();
     QMap<int, CliqueNetwork*> inputs;
@@ -35,7 +38,15 @@ CliqueModule* cl::TransformationSet::createModule()
         }
     }
 
-    assert(inputs.key(inputs.first()) == 0 && inputs.key(inputs.last()) == inputs.size() -1);
+    /* One or more inputs may be ignored */
+    QList<CliqueNetwork *> linputs;
+    for (int k: inputs.keys()) {
+        while (linputs.size() != k) {
+            linputs.push_back(new CliqueNetwork());
+        }
+    }
+
+    //assert(inputs.key(inputs.first()) == 0 && inputs.key(inputs.last()) == inputs.size() -1);
     assert(outputs.key(outputs.first()) == 0 && outputs.key(outputs.last()) == outputs.size() -1);
 
     for (CliqueNetwork *c : inputs.values()) {
@@ -50,6 +61,24 @@ CliqueModule* cl::TransformationSet::createModule()
     }
 
     return module;
+}
+
+QList<Clique> cl::TransformationSet::transform(const QList<Clique> &in)
+{
+    QMap<int, Clique> results;
+
+    for (const cl::Transformation &tr : *this) {
+        QList<Clique> inputs;
+        for (int i : tr.inputs) {
+            inputs.push_back(in[i]);
+        }
+        auto outs = tr.module->getOutputs(inputs);
+        for (int j = 0; j < tr.outputs.size(); j++) {
+            results[tr.outputs[j]] = outs[j];
+        }
+    }
+
+    return results.values();
 }
 
 QDebug operator << (QDebug stream, const Transformation &t) {
@@ -86,14 +115,16 @@ void CliqueModuleIntelligence::resolve()
 
     updateResults();
 
+
     qDebug() << "There are " << results.size() << "results.";
 
-    for (const TransformationSet &key : results.keys()) {
-        qDebug() << key;
-        qDebug() << results[key].size() << " matches";
-    }
+//    for (const TransformationSet &key : results.keys()) {
+//        qDebug() << key;
+//        qDebug() << results[key].size() << " matches";
+//    }
 
     //Get the best results possibles
+
     auto winners = this->winners();
 
     /* Try to merge multiple "constant functions" into a bigger one */
@@ -134,8 +165,35 @@ void CliqueModuleIntelligence::collate()
 
     //We now have our sets of inputs, and corresponding modules
     //How to create a test function that separates them well?
-    CliqueModule *cm = new CliqueModule(base);
-    cm->addDestinationModule();
+
+    /* Check similarities between the least-known group */
+    Classifier cl(this);
+    auto protos = cl.classify(inputs);
+
+    TestModule *test = new TestModule();
+    test->setCharacteristics(protos, modules);
+
+    modules.push_back(test);
+    addAuxiliaryModule(test);
+
+    //debug
+    for (int i = 0; i < dataset.size(); i++) {
+        qDebug() << toInt(convert.words(getInput(i))) << toInt(convert.words(test->getOutputs(getInput(i))));
+    }
+//    for (int i = 0; i < base.numberInputNetworks(); i++) {
+//        test->addInputNetwork(new CliqueNetwork(base.getInputNetwork(i)));
+//    }
+//    test->addOutputNetwork(new CliqueNetwork(base.getOutputNetwork(0)));
+//    test->getOutputNetwork(0)->clear();
+
+//    for (int i = winners.size()-1; i >= 0; i--) {
+//        auto cl = test->addDestinationModule(modules[i]);
+//        if (!protos[i].empty()) {
+//            for (int k : protos[i].keys()) {
+
+//            }
+//        }
+//    }
 }
 
 void CliqueModuleIntelligence::updateResults()
@@ -194,7 +252,7 @@ QList<cl::TransformationSet> CliqueModuleIntelligence::winners()
         for (int remaining : indexes) {
             const auto &in = dataset[remaining].first;
             const auto &out = dataset[remaining].second;
-            qDebug() << convert.words(in) << " -> " << convert.words(out);
+            qDebug() << toInt(convert.words(in)) << " -> " << toInt(convert.words(out)) << " -- " << toInt(convert.words(winner.transform(in)));
         }
 
         winners.push_back(winner);
@@ -225,6 +283,11 @@ QList<CliqueModule*> CliqueModuleIntelligence::getNewModules()
 
     return ret;
 }
+
+ const CliqueModuleIntelligence::input & CliqueModuleIntelligence::getInput (int index) const
+ {
+     return dataset[index].first;
+ }
 
 void CliqueModuleIntelligence::mergeTargets(QList<TransformationSet> &winners)
 {
@@ -339,13 +402,13 @@ void CliqueModuleIntelligence::processDataSet(int index)
 
     QSet<TransformationSet> sets;
 
-    qDebug() << convert.words(in) << " -> " << convert.words(out);
+    //qDebug() << convert.words(in) << " -> " << convert.words(out);
 
     std::function<void(int, const TransformationSet&)> rec
             = [&rec, &sets, index, &out, &in, this] (int j, const TransformationSet &current) {
         if (j >= out.size()) {
             results[current].insert(index);
-            qDebug() << current;
+            //qDebug() << current;
             return;
         }
 
