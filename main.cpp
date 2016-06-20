@@ -37,11 +37,16 @@ int main(/*int argc, char *argv[]*/)
 
     QList<Clique> numberCliques;
 
-    for (int i = 0; i < 10; i++) {
+    string alphabet;
+
+    cout << "Type whole alphabet: ";
+    cin >> alphabet;
+
+    for (char c: alphabet) {
         auto cl = nw.randomClique();
         numberCliques.push_back(cl);
         nw.addClique(cl);
-        convert.learnWord(i, cl);
+        convert.learnWord(QString(1, c), cl);
     }
 
     CliqueModule mod;
@@ -53,62 +58,142 @@ int main(/*int argc, char *argv[]*/)
     mod.addInputNetwork(nw1);
     mod.addOutputNetwork(nw2);
 
-    CliqueModuleIntelligence intel;
-    intel.setBaseModel(&mod);
-
     CliqueModule identity(mod);
     identity.setName("identity");
     identity.buildIdentity();
 
+    CliqueModuleIntelligence intel;
     intel.addAuxiliaryModule(&identity);
 
-    for (int i = 0; i < 10; i++) {
+    for (char c: alphabet) {
         CliqueModule *target = new CliqueModule(mod);
-        target->setName("target" + QString::number(i));
-        target->buildTarget(convert.clique(i));
+        target->setName("target" + QString(QChar(c)));
+        target->buildTarget(convert.clique(QString(1, c)));
         intel.addAuxiliaryModule(target);
     }
 
-    for (int i = 0; i < 9; i++) {
-        //mod.linkInputOutput(convert.clique(i), convert.clique(i+1));
-        intel.addInputOutput(QList<Clique>() << convert.clique(i),
-                             QList<Clique>() << convert.clique(i+1));
+    while (1) {
+        cout << "Input Size: " ;
+        int inSize;
+        cin >> inSize;
+
+        cout << "Ouput Size: ";
+        int outSize;
+        cin >> outSize;
+
+        cout << "In, Out: " << inSize << ", " << outSize << endl;
+
+        CliqueModule base;
+        base.setOwnership(true);
+
+        for (int i = 0; i < inSize; i++) {
+            base.addInputNetwork( new CliqueNetwork(nw) );
+        }
+        for (int i = 0; i < outSize; i++) {
+            base.addOutputNetwork( new CliqueNetwork(nw) );
+        }
+
+        intel.clearData();
+        intel.setBaseModel(&base);
+
+        cout << "- add xx yy: to add input / output" << endl;
+        cout << "- resolve and collate to assimilate results" << endl;
+        cout << "- test xx: to get result" << endl;
+        cout << "- learn: to start learning again" << endl;
+
+        while (1) {
+            string s;
+            cin >> s;
+
+            if (s == "add") {
+                string in, out;
+
+                cin >> in >> out;
+
+                assert(in.size() == inSize);
+                assert(out.size() == outSize);
+
+                QList<Clique> inC, outC;
+                for (char c: in) {
+                    inC << convert.clique(QString(1, c));
+                }
+                for (char c: out) {
+                    outC << convert.clique(QString(1, c));
+                }
+                intel.addInputOutput(inC, outC);
+            } else if (s == "adds") {
+                assert(inSize == outSize && inSize == 1);
+
+                string data;
+                cin >> data;
+
+                for (int i = 0; i +1 < data.size(); i++) {
+                    intel.addInputOutput(QList<Clique>() << convert.clique(QString(1, data[i])), QList<Clique>() << convert.clique(QString(1, data[i+1])));
+                }
+            } else if (s == "resolve") {
+                intel.resolve();
+            } else if (s == "collate") {
+                intel.collate();
+            } else if (s == "test") {
+                string test;
+                cin >> test;
+
+                assert(test.size() == inSize);
+
+                QList<Clique> inC;
+                for (char c: test) {
+                    inC << convert.clique(QString(1, c));
+                }
+                qDebug() << toInt(convert.words(intel.test(inC)));
+            } else if (s == "learn") {
+                break;
+            } else {
+                cout << "Unknown command: " << s << endl;
+            }
+        }
+
+
+//        for (int i = 0; i < 9; i++) {
+//            //mod.linkInputOutput(convert.clique(i), convert.clique(i+1));
+//            intel.addInputOutput(QList<Clique>() << convert.clique(i),
+//                                 QList<Clique>() << convert.clique(i+1));
+//        }
+
+//        intel.resolve();
+
+//        auto module = intel.popModule();
+//        assert(module);
+
+//        for (int i = 0; i < 9; i++) {
+//            cout << "Link of " << i << ": " << convert.word(module->getOutput(convert.clique(i))).toInt() << endl;
+//        }
+
+//        CliqueModule mod2;
+//        mod2.setOwnership(true);
+//        mod2.addInputNetwork( new CliqueNetwork(nw));
+//        mod2.addInputNetwork( new CliqueNetwork(nw));
+//        mod2.addOutputNetwork( new CliqueNetwork(nw));
+//        mod2.addOutputNetwork( new CliqueNetwork(nw));
+
+//        std::uniform_int_distribution<> dist(0, 98);
+
+//        intel.clearData();
+//        intel.setBaseModel(&mod2);
+
+//        for (int i = 0; i < 50; i++) {
+//            int rnd = dist(rng());
+//            QList<int> input = dec(rnd, 2);
+//            QList<int> output = dec(rnd+1, 2);
+//            //qDebug() << input << output;
+//            QList<Clique> inputs = {convert.clique(input[0]), convert.clique(input[1])};
+//            QList<Clique> outputs = {convert.clique(output[0]), convert.clique(output[1])};
+
+//            intel.addInputOutput(inputs, outputs);
+//        }
+
+//        intel.resolve();
+//        intel.collate();
     }
-
-    intel.resolve();
-
-    auto module = intel.popModule();
-    assert(module);
-
-    for (int i = 0; i < 9; i++) {
-        cout << "Link of " << i << ": " << convert.word(module->getOutput(convert.clique(i))).toInt() << endl;
-    }
-
-    CliqueModule mod2;
-    mod2.setOwnership(true);
-    mod2.addInputNetwork( new CliqueNetwork(nw));
-    mod2.addInputNetwork( new CliqueNetwork(nw));
-    mod2.addOutputNetwork( new CliqueNetwork(nw));
-    mod2.addOutputNetwork( new CliqueNetwork(nw));
-
-    std::uniform_int_distribution<> dist(0, 98);
-
-    intel.clearData();
-    intel.setBaseModel(&mod2);
-
-    for (int i = 0; i < 50; i++) {
-        int rnd = dist(rng());
-        QList<int> input = dec(rnd, 2);
-        QList<int> output = dec(rnd+1, 2);
-        //qDebug() << input << output;
-        QList<Clique> inputs = {convert.clique(input[0]), convert.clique(input[1])};
-        QList<Clique> outputs = {convert.clique(output[0]), convert.clique(output[1])};
-
-        intel.addInputOutput(inputs, outputs);
-    }
-
-    intel.resolve();
-    intel.collate();
 
     return 0;
 }

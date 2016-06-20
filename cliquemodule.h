@@ -51,6 +51,7 @@ private:
 
     bool ownership = false;
     bool _isTarget = false;
+    bool _isIdentity = false;
     QString m_Name;
 };
 

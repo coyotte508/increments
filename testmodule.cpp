@@ -1,7 +1,8 @@
 #include <cassert>
 #include "testmodule.h"
+#include <QDebug>
 
-TestModule::TestModule()
+TestModule::TestModule(const QString &name) : CliqueModule(name)
 {
 
 }
@@ -18,9 +19,11 @@ QList<Clique> TestModule::getOutputs(const QList<Clique> &inputs)
 
     for (int i = protos.size()-1; i > 0; i--) {
         if (matchCharacteristics(inputs, protos[i])) {
+            qDebug() << "using " << modules[i]->name();
             return modules[i]->getOutputs(inputs);
         }
     }
+    qDebug() << "using " << modules[0]->name();
     return modules[0]->getOutputs(inputs);
 }
 

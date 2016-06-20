@@ -15,7 +15,7 @@ extern Converter convert;
 
 CliqueModule* cl::TransformationSet::createModule() const
 {
-    CliqueModule *module = new CliqueModule();
+    CliqueModule *module = new CliqueModule(toString());
     QMap<int, CliqueNetwork*> inputs;
     QMap<int, CliqueNetwork*> outputs;
 
@@ -79,6 +79,26 @@ QList<Clique> cl::TransformationSet::transform(const QList<Clique> &in)
     }
 
     return results.values();
+}
+
+QString cl::TransformationSet::toString() const
+{
+    QString ret = "";
+
+    for (const cl::Transformation &tr: *this) {
+        for (int i : tr.inputs) {
+            ret += QString::number(i);
+        }
+
+        ret += " -> " + tr.module->name() + " -> ";
+
+        for (int i : tr.outputs) {
+            ret += QString::number(i);
+        }
+        ret += " ";
+    }
+
+    return ret;
 }
 
 QDebug operator << (QDebug stream, const Transformation &t) {
@@ -170,30 +190,26 @@ void CliqueModuleIntelligence::collate()
     Classifier cl(this);
     auto protos = cl.classify(inputs);
 
-    TestModule *test = new TestModule();
+    TestModule *test = new TestModule("test"+QString::number(auxiliaryModules.size()));
     test->setCharacteristics(protos, modules);
 
     modules.push_back(test);
     addAuxiliaryModule(test);
+    newModules.push_back(test);
 
     //debug
     for (int i = 0; i < dataset.size(); i++) {
         qDebug() << toInt(convert.words(getInput(i))) << toInt(convert.words(test->getOutputs(getInput(i))));
     }
-//    for (int i = 0; i < base.numberInputNetworks(); i++) {
-//        test->addInputNetwork(new CliqueNetwork(base.getInputNetwork(i)));
-//    }
-//    test->addOutputNetwork(new CliqueNetwork(base.getOutputNetwork(0)));
-//    test->getOutputNetwork(0)->clear();
+}
 
-//    for (int i = winners.size()-1; i >= 0; i--) {
-//        auto cl = test->addDestinationModule(modules[i]);
-//        if (!protos[i].empty()) {
-//            for (int k : protos[i].keys()) {
+QList<Clique> CliqueModuleIntelligence::test(const QList<Clique> &input)
+{
+    auto module = newModules.back();
 
-//            }
-//        }
-//    }
+    qDebug() << module->name();
+
+    return module->getOutputs(input);
 }
 
 void CliqueModuleIntelligence::updateResults()

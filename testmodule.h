@@ -7,7 +7,7 @@
 class TestModule : public CliqueModule
 {
 public:
-    TestModule();
+    TestModule(const QString &name = "");
 
     void setCharacteristics(const QList<Classifier::Characteristics>& protos, const QList<CliqueModule*> &modules);
 

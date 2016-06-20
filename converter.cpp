@@ -1,3 +1,4 @@
+#include <cassert>
 #include <QList>
 #include <QDebug>
 #include "utils.h"
@@ -52,8 +53,10 @@ QVariantList Converter::words(const QList<Clique> &data) const
 
     return ret;
 }
+
 Clique Converter::clique(const QVariant &word) const
 {
+    assert(data.contains(word));
     return data.value(word);
 }
 
