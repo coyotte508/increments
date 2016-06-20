@@ -16,6 +16,7 @@ CliqueModule &CliqueModule::operator = (const CliqueModule &other)
 {
     this->ownership = true;
     this->_isTarget = false;
+    this->_isIdentity = false;
 
     QHash<CliqueNetwork*,CliqueNetwork*> assoc;
 
@@ -72,6 +73,10 @@ void CliqueModule::setOwnership(bool ownership)
 
 Clique CliqueModule::getOutput(const Clique &input)
 {
+    if (_isIdentity) {
+        return input;
+    }
+
     /* No safety checks done. Assumes reponsible caller */
     auto cl = CliqueNetworkManager::getOutput(inputs.first(), outputs.first(), input);
 
@@ -85,6 +90,10 @@ Clique CliqueModule::getOutput(const Clique &input)
 
 QList<Clique> CliqueModule::getOutputs(const QList<Clique> &inputs)
 {
+    if (_isIdentity) {
+        return inputs;
+    }
+
     QList<Clique> ret;
 
     shutdown();
@@ -179,6 +188,7 @@ void CliqueModule::linkInputOutput(const Clique &input, const Clique &output)
 
 void CliqueModule::buildIdentity()
 {
+    _isIdentity = true;
     assert(inputs.size() == 1 && outputs.size() == 1);
 
     for (const Clique &c : inputs.first()->allCliques()) {

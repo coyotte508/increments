@@ -128,12 +128,12 @@ QList<int> randomClique(int c, int l)
     return ret;
 }
 
-QList<int> toInt(const QList<QVariant> &l)
+QList<QString> toInt(const QList<QVariant> &l)
 {
-    QList<int> ret;
+    QList<QString> ret;
 
     for (auto x: l) {
-        ret << x.toInt();
+        ret << x.toString();
     }
 
     return ret;

@@ -32,6 +32,8 @@ namespace cl {
     public:
         CliqueModule *createModule() const;
         QList<Clique> transform(const QList<Clique> &in);
+
+        QString toString() const;
     };
     typedef QPair<QSet<int>, QSet<int>> Results;
 }
@@ -63,6 +65,8 @@ public:
     void resolve();
     void collate();
     void clearData();
+
+    QList<Clique> test(const QList<Clique> &input);
 
     CliqueModule *popModule();
     QList<CliqueModule*> getNewModules();

@@ -127,7 +127,7 @@ void CliqueNetwork::linkClique(const Clique &c, CliqueNetwork *nw, const Clique 
         cl::coord ori(i, c[i]);
 
         for (int j = 0; j < c.length(); j++) {
-            addLink(ori, nw, cl::coord(j, c2[i]));
+            addLink(ori, nw, cl::coord(j, c2[j]));
         }
     }
 }
