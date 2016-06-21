@@ -101,6 +101,7 @@ int main(/*int argc, char *argv[]*/)
         cout << "- test xx: to get result" << endl;
         cout << "- next: to start learning again" << endl;
 
+
         while (1) {
             string s;
             cin >> s;
@@ -145,6 +146,7 @@ int main(/*int argc, char *argv[]*/)
                 }
                 qDebug() << toInt(convert.words(intel.test(inC)));
             } else if (s == "next") {
+
                 break;
             } else {
                 cout << "Unknown command: " << s << endl;
