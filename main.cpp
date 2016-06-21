@@ -133,7 +133,7 @@ int main(/*int argc, char *argv[]*/)
             } else if (s == "learn") {
                 intel.resolve();
                 intel.collate();
-            } else if (s == "next") {
+            } else if (s == "test") {
                 string test;
                 cin >> test;
 
@@ -144,7 +144,7 @@ int main(/*int argc, char *argv[]*/)
                     inC << convert.clique(QString(1, c));
                 }
                 qDebug() << toInt(convert.words(intel.test(inC)));
-            } else if (s == "learn") {
+            } else if (s == "next") {
                 break;
             } else {
                 cout << "Unknown command: " << s << endl;

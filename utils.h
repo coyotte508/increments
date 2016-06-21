@@ -7,6 +7,7 @@
 #include <QMap>
 #include <QHash>
 #include <QVariant>
+#include <list>
 
 uint qHash(const QVariant &v);
 
@@ -19,5 +20,29 @@ QList<int> randomClique(int c, int l);
 QList<QString> toInt(const QList<QVariant> &l);
 
 QString debug(const QMap<int, int> &histo);
+
+template<class T>
+std::list<T> comb(T cont, int K)
+{
+    std::list<T> ret;
+
+    std::string bitmask(K, 1); // K leading 1's
+    bitmask.resize(cont.size(), 0); // N-K trailing 0's
+
+    // print integers and permute bitmask
+    do {
+        T v;
+
+        for (int i = 0; i < int(cont.size()); ++i) // [0..N-1] integers
+        {
+            if (bitmask[i]) {
+                v.push_back(cont[i]);
+            }
+        }
+        ret.push_back(v);
+    } while (std::prev_permutation(bitmask.begin(), bitmask.end()));
+
+    return ret;
+}
 
 #endif // UTILS_H

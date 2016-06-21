@@ -8,6 +8,7 @@
 
 //Needs to be below sadly due to qHash redefinition
 #include <QDebug>
+#include <deque>
 
 using namespace cl;
 
@@ -246,24 +247,31 @@ QList<cl::TransformationSet> CliqueModuleIntelligence::winners()
     QList<TransformationSet> winners;
     auto results = this->results;
 
+    QSet<TransformationSet> all = results.keys().toSet();
+
     int i = 0;
-    while (indexes.size() > 0) {
+    while (indexes.size() > 0 && all.size() > 0) {
         TransformationSet winner;
         int max = 0;
+        int maxSize = 0; //the best transformation is the simplest one, i.e. the one with the least elements.
         i++;
 
-        for (const TransformationSet &key : results.keys()) {
+        for (const TransformationSet &key : all) {
             int count = results[key].intersect(indexes).count();
 
-            if (count > max) {
+            if (count > max || (count == max && key.count() < maxSize)) {
                 max = count;
+                maxSize = key.count();
                 winner = key;
             }
         }
 
+        assert(max > 0);
+
         qDebug() << "Winner #" << i << " " << winner << ": " << results[winner].size();
 
         indexes.subtract(results[winner]);
+        all.remove(winner);
 
         for (int remaining : indexes) {
             const auto &in = dataset[remaining].first;
@@ -417,31 +425,80 @@ void CliqueModuleIntelligence::processDataSet(int index)
     const output &out = data.second;
 
     QSet<TransformationSet> sets;
+    std::deque<int> outputsRemaining;
+    for (int i = 0; i < out.size(); i++) {
+        outputsRemaining.push_back(i);
+    }
 
     //qDebug() << convert.words(in) << " -> " << convert.words(out);
 
-    std::function<void(int, const TransformationSet&)> rec
-            = [&rec, &sets, index, &out, &in, this] (int j, const TransformationSet &current) {
-        if (j >= out.size()) {
+    std::function<void(std::deque<int>, const TransformationSet&)> rec
+            = [&rec, &sets, index, &out, &in, this] (std::deque<int> rem, const TransformationSet &current) {
+        if (rem.size() == 0) {
             results[current].insert(index);
             //qDebug() << current;
             return;
         }
 
-        const auto &target = out[j];
-        //qDebug() << target;
+        std::sort(rem.begin(), rem.end());
+        int firstOutput = rem.front();
+        rem.erase(rem.begin());
 
         for (CliqueModule *module : auxiliaryModules) {
-            for (int i = 0; i < in.size(); i++) {
-                //qDebug() << in[i] << module->getOutput(in[i]);
-                if (module->getOutput(in[i]) == target) {
-                    TransformationSet alt = current;
-                    alt.append({{i},{j}, module});
-                    rec(j+1, alt);
+            /* k correponds to the number of additional outputs */
+            for (int k = 0; k < rem.size() +1 && k < module->noutputs(); k++) {
+                auto combs = comb(rem, k);
+
+                if (k == 0) {
+                    std::deque<int> simple;
+                    simple.push_front(firstOutput);
+                    combs.push_back(simple);
+                } else {
+                    for (auto &el : combs) {
+                        el.push_front(firstOutput);
+                    }
+                }
+                for (auto elOut : combs) {
+                    do {
+                        /* We have the outputs, now we should have all the combinations of inputs... */
+                        std::deque<int> possibleInputs;
+                        for (int i = 0; i < in.size(); i++) {
+                            possibleInputs.push_back(i);
+                        }
+                        auto combsIn = comb(possibleInputs, module->ninputs());
+
+                        for (auto elIn : combsIn) {
+                            do {
+                                QList<Clique> testIn, testOut;
+                                for (int i : elIn) testIn.push_back(in[i]);
+                                for (int j : elOut) testOut.push_back(out[j]);
+
+                                //qDebug() << in[i] << module->getOutput(in[i]);
+                                if (module->getOutputs(testIn) == testOut) {
+                                    TransformationSet alt = current;
+
+                                    QList<int> a,b;
+                                    for (int i : elIn) {a << i;}
+                                    for (int j : elOut) { b << j;}
+
+                                    alt.append({a, b, module});
+
+                                    auto cop = rem;
+                                    for (int j : elOut) {
+                                        auto pos = std::find(cop.begin(),cop.end(),j);
+                                        if (pos != cop.end()) {
+                                            cop.erase(pos);
+                                        }
+                                    }
+                                    rec(cop, alt);
+                                }
+                            } while (std::next_permutation(elIn.begin(), elIn.end()));
+                        }
+                    } while (std::next_permutation(elOut.begin(), elOut.end()));
                 }
             }
         }
     };
 
-    rec(0, TransformationSet());
+    rec(outputsRemaining, TransformationSet());
 }
