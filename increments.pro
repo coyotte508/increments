@@ -29,4 +29,5 @@ HEADERS += \
     cliquemodule.h \
     cliquemoduleintelligence.h \
     classifier.h \
-    testmodule.h
+    testmodule.h \
+    cltransformations.h

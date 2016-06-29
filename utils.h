@@ -22,9 +22,9 @@ QList<QString> toInt(const QList<QVariant> &l);
 QString debug(const QMap<int, int> &histo);
 
 template<class T>
-std::list<T> comb(T cont, int K)
+QList<T> comb(T cont, int K)
 {
-    std::list<T> ret;
+    QList<T> ret;
 
     std::string bitmask(K, 1); // K leading 1's
     bitmask.resize(cont.size(), 0); // N-K trailing 0's

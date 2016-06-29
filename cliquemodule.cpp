@@ -1,6 +1,10 @@
 #include "cliquemodule.h"
+#include "utils.h"
+#include "converter.h"
 #include <cassert>
 #include <QDebug>
+
+extern Converter convert;
 
 CliqueModule::CliqueModule(const QString &name) : m_Name(name)
 {
@@ -108,6 +112,64 @@ QList<Clique> CliqueModule::getOutputs(const QList<Clique> &inputs)
     iterate();
     for (auto output : outputs) {
         ret.push_back(output->activatedClique());
+    }
+
+    return ret;
+}
+
+QList<cl::Transformation> CliqueModule::getCombinationInputs(const QList<Clique> &inputs, const QList<Clique> &outputs, int firstOutput, const std::deque<int> &remainingOutputs)
+{
+    QList<cl::Transformation> ret;
+
+    qDebug() << toInt(convert.words(inputs)) << toInt(convert.words(outputs));
+
+    /* k correponds to the number of additional outputs */
+    for (int k = 0; k < remainingOutputs.size() + 1 && k < noutputs(); k++) {
+        auto combs = comb(remainingOutputs, k);
+
+        if (k == 0) {
+            std::deque<int> simple;
+            simple.push_front(firstOutput);
+            combs.push_back(simple);
+        } else {
+            for (auto &el : combs) {
+                el.push_front(firstOutput);
+            }
+        }
+
+        std::deque<int> possibleInputs;
+        for (int i = 0; i < inputs.size(); i++) {
+            possibleInputs.push_back(i);
+        }
+        auto combsIn = comb(possibleInputs, ninputs());
+
+        for (auto elIn : combsIn) {
+            do {
+                QList<Clique> testIn;
+                for (int i : elIn) testIn.push_back(inputs[i]);
+
+                QList<Clique> res = getOutputs(testIn);
+
+                for (auto elOut : combs) {
+                    do {
+                        QList<Clique> testOut;
+
+                        for (int i: elOut) {
+                            testOut.push_back(res[i]);
+                        }
+
+                        if (testOut == outputs) {
+                            cl::Transformation tr;
+                            tr.module = this;
+                            for (int i : elIn) tr.inputs << i;
+                            for (int i : elOut) tr.outputs << i;
+
+                            ret.push_back(tr);
+                        }
+                    } while (std::next_permutation(elOut.begin(), elOut.end()));
+                }
+            } while (std::next_permutation(elIn.begin(), elIn.end()));
+        }
     }
 
     return ret;

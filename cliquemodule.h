@@ -2,6 +2,9 @@
 #define CLIQUEMODULE_H
 
 #include "cliquenetworkmanager.h"
+#include "cltransformations.h"
+
+#include <deque>
 
 class CliqueModule : public CliqueNetworkManager
 {
@@ -22,6 +25,8 @@ public:
 
     Clique getOutput(const Clique &input);
     virtual QList<Clique> getOutputs(const QList<Clique> &inputs);
+
+    QList<cl::Transformation> getCombinationInputs(const QList<Clique> &inputs, const QList<Clique> &outputs, int firstOutput, const std::deque<int> &remainingOutputs);
 
     /* More costly functions which will determine which cliques are connected
      * to a specific input or output exactly */

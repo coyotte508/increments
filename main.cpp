@@ -2,6 +2,7 @@
 #include <QDebug>
 #include <iostream>
 #include <cassert>
+#include <sstream>
 #include "cliquenetwork.h"
 #include "converter.h"
 #include "cliquenetworkmanager.h"
@@ -29,6 +30,13 @@ QList<int> dec(int x, int n) {
 
 Converter convert;
 
+string testCommands = string("0123456789\n")
+        + "1\n1\n"
+        + "adds 012345679\n"
+        + "learn\nnext\n2\n2\n"
+        + "add 01 02\nadd 32 33\nadd 29 30\nadd 49 50\nadd 68 69\nadd 13 14\n"
+        + "learn\n";
+
 int main(/*int argc, char *argv[]*/)
 {
     qInstallMessageHandler(myMessageOutput);
@@ -38,6 +46,9 @@ int main(/*int argc, char *argv[]*/)
     QList<Clique> numberCliques;
 
     string alphabet;
+
+    stringstream stream(testCommands);
+#define cin stream
 
     cout << "Type whole alphabet: ";
     cin >> alphabet;
@@ -150,6 +161,7 @@ int main(/*int argc, char *argv[]*/)
                 break;
             } else {
                 cout << "Unknown command: " << s << endl;
+                return 1;
             }
         }
     }

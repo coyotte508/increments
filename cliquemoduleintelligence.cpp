@@ -445,57 +445,26 @@ void CliqueModuleIntelligence::processDataSet(int index)
         rem.erase(rem.begin());
 
         for (CliqueModule *module : auxiliaryModules) {
-            /* k correponds to the number of additional outputs */
-            for (int k = 0; k < rem.size() +1 && k < module->noutputs(); k++) {
-                auto combs = comb(rem, k);
+            QList<Transformation> transformations = module->getCombinationInputs(in, out, firstOutput, rem);
 
-                if (k == 0) {
-                    std::deque<int> simple;
-                    simple.push_front(firstOutput);
-                    combs.push_back(simple);
-                } else {
-                    for (auto &el : combs) {
-                        el.push_front(firstOutput);
+            for (const auto &transformation : transformations) {
+                TransformationSet alt = current;
+                alt.push_back(transformation);
+
+                auto set = rem;
+
+                //remove used outputs from the destinatoin
+                for (int output : transformation.outputs) {
+                    auto it = std::find(set.begin(), set.end(), output);
+
+                    assert(it != set.end() || output == firstOutput);
+
+                    if (it != set.end()) {
+                        set.erase(it);
                     }
                 }
-                for (auto elOut : combs) {
-                    do {
-                        /* We have the outputs, now we should have all the combinations of inputs... */
-                        std::deque<int> possibleInputs;
-                        for (int i = 0; i < in.size(); i++) {
-                            possibleInputs.push_back(i);
-                        }
-                        auto combsIn = comb(possibleInputs, module->ninputs());
 
-                        for (auto elIn : combsIn) {
-                            do {
-                                QList<Clique> testIn, testOut;
-                                for (int i : elIn) testIn.push_back(in[i]);
-                                for (int j : elOut) testOut.push_back(out[j]);
-
-                                //qDebug() << in[i] << module->getOutput(in[i]);
-                                if (module->getOutputs(testIn) == testOut) {
-                                    TransformationSet alt = current;
-
-                                    QList<int> a,b;
-                                    for (int i : elIn) {a << i;}
-                                    for (int j : elOut) { b << j;}
-
-                                    alt.append({a, b, module});
-
-                                    auto cop = rem;
-                                    for (int j : elOut) {
-                                        auto pos = std::find(cop.begin(),cop.end(),j);
-                                        if (pos != cop.end()) {
-                                            cop.erase(pos);
-                                        }
-                                    }
-                                    rec(cop, alt);
-                                }
-                            } while (std::next_permutation(elIn.begin(), elIn.end()));
-                        }
-                    } while (std::next_permutation(elOut.begin(), elOut.end()));
-                }
+                rec(set, alt);
             }
         }
     };
