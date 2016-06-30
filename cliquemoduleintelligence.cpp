@@ -155,6 +155,8 @@ void CliqueModuleIntelligence::resolve()
 
 void CliqueModuleIntelligence::collate()
 {
+    qDebug() << "Collating...";
+
     /* Todo: find way of collating different winners by testing the input and going in the right direction */
     updateResults(); //in case of merged targets, rerun the results with new modules
 
@@ -177,6 +179,7 @@ void CliqueModuleIntelligence::collate()
         CliqueModule *module = winner.createModule();
         addAuxiliaryModule(module);
         modules.push_back(module);
+        newModules.push_back(module);
     }
 
     /* No need to collate inputs if only one solution */
@@ -194,7 +197,6 @@ void CliqueModuleIntelligence::collate()
     TestModule *test = new TestModule("test"+QString::number(auxiliaryModules.size()));
     test->setCharacteristics(protos, modules);
 
-    modules.push_back(test);
     addAuxiliaryModule(test);
     newModules.push_back(test);
 
