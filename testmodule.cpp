@@ -11,6 +11,14 @@ void TestModule::setCharacteristics(const QList<Classifier::Characteristics> &pr
 {
     this->protos = protos;
     this->modules = modules;
+
+    auto &m = modules[0];
+    for (int i = 0; i < m->ninputs(); i++) {
+        addInputNetwork(m->getInputNetwork(i));
+    }
+    for (int i = 0; i < m->noutputs(); i++) {
+        addOutputNetwork(m->getOutputNetwork(i));
+    }
 }
 
 QList<Clique> TestModule::getOutputs(const QList<Clique> &inputs)

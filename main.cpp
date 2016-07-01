@@ -35,7 +35,17 @@ string testCommands = string("0123456789\n")
         + "adds 0123456789\n"
         + "learn\nnext\n2\n2\n"
         + "add 01 02\nadd 32 33\nadd 29 30\nadd 49 50\nadd 68 69\nadd 13 14\n"
-        + "learn\n";
+        + "learn\nnext\n3\n3\n"
+        + "add 001 002\nadd 023 024\nadd 136 137\nadd 399 400\nadd 259 260\nadd 699 700\nadd 456 457";
+stringstream stream(testCommands);
+
+std::istream & gin() {
+    if (stream && !stream.eof()) {
+        return stream;
+    } else {
+        return cin;
+    }
+}
 
 int main(/*int argc, char *argv[]*/)
 {
@@ -47,11 +57,8 @@ int main(/*int argc, char *argv[]*/)
 
     string alphabet;
 
-    stringstream stream(testCommands);
-#define cin stream
-
     cout << "Type whole alphabet: ";
-    cin >> alphabet;
+    gin() >> alphabet;
 
     for (char c: alphabet) {
         auto cl = nw.randomClique();
@@ -86,11 +93,11 @@ int main(/*int argc, char *argv[]*/)
     while (1) {
         cout << "Input Size: " ;
         int inSize;
-        cin >> inSize;
+        gin() >> inSize;
 
         cout << "Ouput Size: ";
         int outSize;
-        cin >> outSize;
+        gin() >> outSize;
 
         cout << "In, Out: " << inSize << ", " << outSize << endl;
 
@@ -115,12 +122,12 @@ int main(/*int argc, char *argv[]*/)
 
         while (1) {
             string s;
-            cin >> s;
+            gin() >> s;
 
             if (s == "add") {
                 string in, out;
 
-                cin >> in >> out;
+                gin() >> in >> out;
 
                 assert(in.size() == inSize);
                 assert(out.size() == outSize);
@@ -137,7 +144,7 @@ int main(/*int argc, char *argv[]*/)
                 assert(inSize == outSize && inSize == 1);
 
                 string data;
-                cin >> data;
+                gin() >> data;
 
                 for (int i = 0; i +1 < data.size(); i++) {
                     intel.addInputOutput(QList<Clique>() << convert.clique(QString(1, data[i])), QList<Clique>() << convert.clique(QString(1, data[i+1])));
@@ -147,10 +154,11 @@ int main(/*int argc, char *argv[]*/)
                 intel.collate();
             } else if (s == "test") {
                 string test;
-                cin >> test;
+                gin() >> test;
 
                 assert(test.size() == inSize);
 
+                qDebug() << "testing " << QString::fromStdString(test);
                 QList<Clique> inC;
                 for (char c: test) {
                     inC << convert.clique(QString(1, c));

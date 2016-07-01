@@ -42,15 +42,16 @@ CliqueModule* cl::TransformationSet::createModule() const
     /* One or more inputs may be ignored */
     QList<CliqueNetwork *> linputs;
     for (int k: inputs.keys()) {
-        while (linputs.size() != k) {
+        while (linputs.size() < k) {
             linputs.push_back(new CliqueNetwork());
         }
+        linputs.push_back(inputs[k]);
     }
 
     //assert(inputs.key(inputs.first()) == 0 && inputs.key(inputs.last()) == inputs.size() -1);
     assert(outputs.key(outputs.first()) == 0 && outputs.key(outputs.last()) == outputs.size() -1);
 
-    for (CliqueNetwork *c : inputs.values()) {
+    for (CliqueNetwork *c : linputs) {
         module->addInputNetwork(c);
     }
     for (CliqueNetwork *c : outputs.values()) {
@@ -196,6 +197,8 @@ void CliqueModuleIntelligence::collate()
 
     TestModule *test = new TestModule("test"+QString::number(auxiliaryModules.size()));
     test->setCharacteristics(protos, modules);
+
+    qDebug() << "Collated into " << test->name();
 
     addAuxiliaryModule(test);
     newModules.push_back(test);
