@@ -17,46 +17,46 @@ extern Converter convert;
 CliqueModule* cl::TransformationSet::createModule() const
 {
     CliqueModule *module = new CliqueModule(toString());
-    QMap<int, CliqueNetwork*> inputs;
-    QMap<int, CliqueNetwork*> outputs;
+//    QMap<int, CliqueNetwork*> inputs;
+//    QMap<int, CliqueNetwork*> outputs;
 
-    for (const Transformation& t: *this) {
-        for (int i = 0; i < t.inputs.size(); i++) {
-            int key = t.inputs[i];
-            CliqueNetwork *ori = t.module->getInputNetwork(i);
-            if (!inputs.contains(key)) {
-                inputs[key] = new CliqueNetwork();
-            }
-            inputs[key]->copyAdd(*ori);
-        }
-        for (int i = 0; i < t.outputs.size(); i++) {
-            int key = t.outputs[i];
-            CliqueNetwork *ori = t.module->getOutputNetwork(i);
-            if (!outputs.contains(key)) {
-                outputs[key] = new CliqueNetwork();
-            }
-            outputs[key]->copyAdd(*ori);
-        }
-    }
+//    for (const Transformation& t: *this) {
+//        for (int i = 0; i < t.inputs.size(); i++) {
+//            int key = t.inputs[i];
+//            CliqueNetwork *ori = t.module->getInputNetwork(i);
+//            if (!inputs.contains(key)) {
+//                inputs[key] = new CliqueNetwork();
+//            }
+//            inputs[key]->copyAdd(*ori);
+//        }
+//        for (int i = 0; i < t.outputs.size(); i++) {
+//            int key = t.outputs[i];
+//            CliqueNetwork *ori = t.module->getOutputNetwork(i);
+//            if (!outputs.contains(key)) {
+//                outputs[key] = new CliqueNetwork();
+//            }
+//            outputs[key]->copyAdd(*ori);
+//        }
+//    }
 
-    /* One or more inputs may be ignored */
-    QList<CliqueNetwork *> linputs;
-    for (int k: inputs.keys()) {
-        while (linputs.size() < k) {
-            linputs.push_back(new CliqueNetwork());
-        }
-        linputs.push_back(inputs[k]);
-    }
+//    /* One or more inputs may be ignored */
+//    QList<CliqueNetwork *> linputs;
+//    for (int k: inputs.keys()) {
+//        while (linputs.size() < k) {
+//            linputs.push_back(new CliqueNetwork());
+//        }
+//        linputs.push_back(inputs[k]);
+//    }
 
-    //assert(inputs.key(inputs.first()) == 0 && inputs.key(inputs.last()) == inputs.size() -1);
-    assert(outputs.key(outputs.first()) == 0 && outputs.key(outputs.last()) == outputs.size() -1);
+//    //assert(inputs.key(inputs.first()) == 0 && inputs.key(inputs.last()) == inputs.size() -1);
+//    assert(outputs.key(outputs.first()) == 0 && outputs.key(outputs.last()) == outputs.size() -1);
 
-    for (CliqueNetwork *c : linputs) {
-        module->addInputNetwork(c);
-    }
-    for (CliqueNetwork *c : outputs.values()) {
-        module->addOutputNetwork(c);
-    }
+//    for (CliqueNetwork *c : linputs) {
+//        module->addInputNetwork(c);
+//    }
+//    for (CliqueNetwork *c : outputs.values()) {
+//        module->addOutputNetwork(c);
+//    }
 
     for (const Transformation &t: *this) {
         module->addModule(t.module, t.inputs, t.outputs);

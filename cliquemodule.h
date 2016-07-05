@@ -34,15 +34,13 @@ public:
     QList<Clique> analyzeOutput(const Clique &input);
 
     void addModule(CliqueModule *module, QList<int> ins, QList<int> outs);
-    Clique addDestinationModule(CliqueModule *module);
-    void addDestinationModule(CliqueModule *module, const Clique &c);
     void clearOutputCliques();
     void linkInputOutput(const Clique &input, const Clique &output);
     void buildIdentity();
     void buildTarget(const Clique &dest);
 
-    int ninputs () const { return inputs.size(); }
-    int noutputs () const { return outputs.size(); }
+    virtual int ninputs () const ;
+    virtual int noutputs () const ;
 
     bool isTarget() const { return _isTarget;}
 
@@ -53,6 +51,8 @@ private:
     QList<CliqueNetwork*> outputs;
 
     QHash<Clique, CliqueModule*> destinationModules;
+
+    cl::TransformationSet transformations;
 
     bool ownership = false;
     bool _isTarget = false;

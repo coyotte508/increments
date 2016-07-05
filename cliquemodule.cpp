@@ -98,7 +98,15 @@ QList<Clique> CliqueModule::getOutputs(const QList<Clique> &inputs)
         return inputs;
     }
 
+    if (!transformations.isEmpty()) {
+        return transformations.transform(inputs);
+    }
+
     QList<Clique> ret;
+    int nouts = noutputs();
+    for (int i = 0; i < nouts; i++) {
+        ret.push_back(Clique());
+    }
 
     shutdown();
 
@@ -110,8 +118,8 @@ QList<Clique> CliqueModule::getOutputs(const QList<Clique> &inputs)
         }
     }
     iterate();
-    for (auto output : outputs) {
-        ret.push_back(output->activatedClique());
+    for (int i= 0; i < outputs.size(); i++) {
+        ret[i] = outputs[i]->activatedClique();
     }
 
     return ret;
@@ -212,33 +220,7 @@ QList<Clique> CliqueModule::analyzeOutput(const Clique &input)
 
 void CliqueModule::addModule(CliqueModule *module, QList<int> ins, QList<int> outs)
 {
-    for (CliqueNetwork *nw : module->nws) {
-        addNetwork(nw);
-    }
-
-    for (int i = 0; i < ins.size(); i++) {
-        getInputNetwork(ins[i])->buildIdentity(module->getInputNetwork(i));
-    }
-    for (int i = 0; i < outs.size(); i++) {
-        module->getOutputNetwork(i)->buildIdentity(getOutputNetwork(outs[i]));
-    }
-}
-
-Clique CliqueModule::addDestinationModule(CliqueModule *module)
-{
-    auto output = outputs.first();
-    auto cl = output->randomClique();
-
-    output->addClique(cl);
-    destinationModules[cl] = module;
-
-    return cl;
-}
-
-void CliqueModule::addDestinationModule(CliqueModule *module, const Clique &cl)
-{
-    outputs.first()->addClique(cl);
-    destinationModules[cl] = module;
+    transformations.push_back({ins, outs, module});
 }
 
 void CliqueModule::clearOutputCliques()
@@ -272,4 +254,30 @@ void CliqueModule::buildTarget(const Clique &target)
     }
 
     _isTarget = true;
+}
+
+int CliqueModule::ninputs() const
+{
+    int maxIn = inputs.size();
+
+    for (const auto &tr : transformations) {
+        for (int i : tr.inputs) {
+            maxIn == std::max(i, maxIn);
+        }
+    }
+
+    return maxIn;
+}
+
+int CliqueModule::noutputs() const
+{
+    int maxIn = outputs.size();
+
+    for (const auto &tr : transformations) {
+        for (int i : tr.outputs) {
+            maxIn == std::max(i, maxIn);
+        }
+    }
+
+    return maxIn;
 }

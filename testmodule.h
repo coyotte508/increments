@@ -12,6 +12,9 @@ public:
     void setCharacteristics(const QList<Classifier::Characteristics>& protos, const QList<CliqueModule*> &modules);
 
     QList<Clique> getOutputs(const QList<Clique> &inputs) override;
+
+    int ninputs() const override;
+    int noutputs() const override;
 private:
     bool matchCharacteristics(const QList<Clique> &inputs, const Classifier::Characteristics &proto);
 
