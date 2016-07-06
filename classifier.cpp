@@ -1,5 +1,10 @@
 #include <cassert>
+#include <QDebug>
+#include "converter.h"
 #include "classifier.h"
+#include "utils.h"
+
+extern Converter convert;
 
 QList<Classifier::Characteristics> Classifier::classify(const QList<QSet<int> > &_inputs)
 {
@@ -10,6 +15,8 @@ QList<Classifier::Characteristics> Classifier::classify(const QList<QSet<int> > 
 
     while (inputs.size() > 1) {
         QList<Clique> base = intel->getInput(*inputs.first().begin());
+        qDebug() << "beginning: " << toInt(convert.words(base));
+
         /* Get similarities in inputs */
         for (int i : inputs.first()) {
             auto in = intel->getInput(i);
@@ -21,16 +28,21 @@ QList<Classifier::Characteristics> Classifier::classify(const QList<QSet<int> > 
             }
         }
 
-        /* Remove if they are present in other inputs */
+        qDebug() << "match: " << toInt(convert.words(base));
+
+        /* Check that it doesn't engulf wrongly other inputs */
         for (int i = 1; i < inputs.size(); i++) {
             for (int j : inputs[i]) {
                 auto in = intel->getInput(j);
 
+                bool matching = true;
                 for (int k = 0; k < in.size(); k++) {
-                    if (in[k] == base[k]) {
-                        base[k].clear();
+                    if (!base[k].empty() && in[k] != base[k]) {
+                        matching = false;
                     }
                 }
+
+                assert(!matching);
             }
         }
 

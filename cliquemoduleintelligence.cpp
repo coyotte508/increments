@@ -130,6 +130,10 @@ void CliqueModuleIntelligence::addInputOutput(const input &in, const output &out
 
 void CliqueModuleIntelligence::resolve()
 {
+    for (CliqueModule *module : auxiliaryModules) {
+        qDebug() << module->name();
+    }
+
     if (dataset.empty()) {
         qDebug() << "Empty dataset!";
         return;
@@ -450,6 +454,12 @@ void CliqueModuleIntelligence::processDataSet(int index)
         rem.erase(rem.begin());
 
         for (CliqueModule *module : auxiliaryModules) {
+            if (rem.size() == 2 && module->name() == "identity") {
+                qDebug() << "interesting" << toInt(convert.words(in)) << toInt(convert.words(out));
+            }
+            if (rem.size() == 1 && module->name() == "test14") {
+                qDebug() << "interesting" << toInt(convert.words(in)) << toInt(convert.words(out));
+            }
             QList<Transformation> transformations = module->getCombinationInputs(in, out, firstOutput, rem);
 
             for (const auto &transformation : transformations) {
@@ -458,7 +468,7 @@ void CliqueModuleIntelligence::processDataSet(int index)
 
                 auto set = rem;
 
-                //remove used outputs from the destinatoin
+                //remove used outputs from the destination
                 for (int output : transformation.outputs) {
                     auto it = std::find(set.begin(), set.end(), output);
 

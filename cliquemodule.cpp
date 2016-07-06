@@ -132,7 +132,7 @@ QList<cl::Transformation> CliqueModule::getCombinationInputs(const QList<Clique>
     //qDebug() << "Process: " << toInt(convert.words(inputs)) << toInt(convert.words(outputs));
 
     /* k correponds to the number of additional outputs */
-    for (int k = 0; k < remainingOutputs.size() + 1 && k < noutputs(); k++) {
+    for (int k = 0; k < int(remainingOutputs.size()) + 1 && k < noutputs(); k++) {
         auto combs = comb(remainingOutputs, k);
 
         if (k == 0) {
@@ -164,7 +164,7 @@ QList<cl::Transformation> CliqueModule::getCombinationInputs(const QList<Clique>
                     do {
                         QList<Clique> shouldOut;
 
-                        for (int i = 0; i < elOut.size(); i++) {
+                        for (unsigned i = 0; i < elOut.size(); i++) {
                             shouldOut.push_back(outputs[elOut[i]]);
                         }
 
@@ -262,7 +262,7 @@ int CliqueModule::ninputs() const
 
     for (const auto &tr : transformations) {
         for (int i : tr.inputs) {
-            maxIn == std::max(i, maxIn);
+            maxIn = std::max(i+1, maxIn);
         }
     }
 
@@ -275,7 +275,7 @@ int CliqueModule::noutputs() const
 
     for (const auto &tr : transformations) {
         for (int i : tr.outputs) {
-            maxIn == std::max(i, maxIn);
+            maxIn = std::max(i+1, maxIn);
         }
     }
 

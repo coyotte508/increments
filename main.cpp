@@ -36,7 +36,7 @@ string testCommands = string("0123456789\n")
         + "learn\nnext\n2\n2\n"
         + "add 01 02\nadd 32 33\nadd 29 30\nadd 49 50\nadd 68 69\nadd 13 14\n"
         + "learn\nnext\n3\n3\n"
-        + "add 001 002\nadd 023 024\nadd 136 137\nadd 399 400\nadd 259 260\nadd 699 700\nadd 456 457"; //+\nadd 099 100\nadd 819 820
+        + "add 001 002\nadd 023 024\nadd 136 137\nadd 399 400\nadd 259 260\nadd 699 700\nadd 456 457\nadd 099 100\nadd 819 820";
 stringstream stream(testCommands);
 
 std::istream & gin() {
