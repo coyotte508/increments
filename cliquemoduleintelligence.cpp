@@ -329,40 +329,38 @@ void CliqueModuleIntelligence::mergeTargets(QList<TransformationSet> &winners)
     /* Try to rebuild target types */
     while (1) {
         /* We'll try to merge everything into firstTarget */
-        int firstTarget = -1;
-        int indice = 0;
-        CliqueModule *baseModule = nullptr;
-        for (int i = 0; i < winners.size(); i++) {
-            for (int j = 0; j < winners[i].size(); j++) {
-                if (winners[i][j].module->isTarget()) {
-                    firstTarget = i, indice = j;
-                    baseModule = winners[i][j].module;
-                    goto outloop;
+        cl::coord target;
+        /* Finds a target module within the winner modules */
+        auto findTarget = [&] (cl::coord &target){
+            for (int i = 0; i < winners.size(); i++) {
+                for (int j = 0; j < winners[i].size(); j++) {
+                    if (winners[i][j].module->isTarget()) {
+                        target.first = i;
+                        target.second = j;
+                        return winners[i][j];
+                    }
                 }
             }
+            return cl::Transformation();
+        };
+
+        cl::Transformation winner = findTarget(target);
+
+        if (!winner.module) {
+            break;
         }
-        break;
-outloop:
+
+        /* All clique-to-clique associations */
         QHash<Clique, Clique> recordedInputs;
+        /* All locations of modules (# of winner, # of transformation) corresponding to associations */
         QSet<QPair<int,int>> locations;
 
-        locations.insert(QPair<int,int>(firstTarget, indice));
+        locations.insert(target);
 
+        /* Add clique-to-clique association in *recordedInputs*, for each 'result' belonging to a specific winner*/
         auto logInputs = [&](int index, const cl::Transformation &t) {
             auto winner = winners[index];
             auto dataset = results[winner];
-
-            assert(t.inputs.size() == 1);
-            assert(t.outputs.size() == 1);
-
-            for (int i: dataset) {
-                recordedInputs[this->dataset[i].first[t.inputs[0]]] = this->dataset[i].second[t.outputs[0]];
-            }
-        };
-        logInputs(firstTarget, winners[firstTarget][indice]);
-
-        auto areInputsCompatible = [&] (int index, const cl::Transformation &t) {
-            auto dataset = results[winners[index]];
 
             assert(t.inputs.size() == 1);
             assert(t.outputs.size() == 1);
@@ -375,25 +373,32 @@ outloop:
                     return false;
                 }
             }
+            for (int i: dataset) {
+                auto key = this->dataset[i].first[t.inputs[0]];
+                auto val = this->dataset[i].second[t.outputs[0]];
+
+                recordedInputs[key] = val;
+            }
             return true;
         };
+        logInputs(target.first, winner);
+
 
         /* Search target targets :) */
-        for (int i = firstTarget+1; i < winners.size(); i++) {
+        for (int i = target.first+1; i < winners.size(); i++) {
             for (int j = 0; j < winners[i].size(); j++) {
                 if (!winners[i][j].module->isTarget()) {
                     continue;
                 }
-                if (!winners[i][j].matchInputsOutputs(winners[firstTarget][indice])) {
+                if (!winners[i][j].matchInputsOutputs(winner)) {
                     continue;
                 }
 
                 /* Check if targets are compatible */
-                if (!areInputsCompatible(i, winners[i][j])) {
+                if (!logInputs(i, winners[i][j])) {
                     continue;
                 }
 
-                logInputs(i, winners[i][j]);
                 locations.insert(QPair<int,int>(i, j));
             }
         }
@@ -404,7 +409,7 @@ outloop:
             break;
         }
 
-        CliqueModule *disciple = new CliqueModule(*baseModule);
+        CliqueModule *disciple = winner.module->cloneDimensions();
         disciple->setName(QString("internal%1").arg(auxiliaryModules.size()));
 
         for (const Clique &c: recordedInputs.keys()) {
@@ -454,12 +459,12 @@ void CliqueModuleIntelligence::processDataSet(int index)
         rem.erase(rem.begin());
 
         for (CliqueModule *module : auxiliaryModules) {
-            if (rem.size() == 2 && module->name() == "identity") {
-                qDebug() << "interesting" << toInt(convert.words(in)) << toInt(convert.words(out));
-            }
-            if (rem.size() == 1 && module->name() == "test14") {
-                qDebug() << "interesting" << toInt(convert.words(in)) << toInt(convert.words(out));
-            }
+//            if (rem.size() == 2 && module->name() == "identity") {
+//                qDebug() << "interesting" << toInt(convert.words(in)) << toInt(convert.words(out));
+//            }
+//            if (rem.size() == 1 && module->name() == "test14") {
+//                qDebug() << "interesting" << toInt(convert.words(in)) << toInt(convert.words(out));
+//            }
             QList<Transformation> transformations = module->getCombinationInputs(in, out, firstOutput, rem);
 
             for (const auto &transformation : transformations) {

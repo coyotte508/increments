@@ -10,7 +10,6 @@ CONFIG -= app_bundle
 TEMPLATE = app
 
 SOURCES += main.cpp \
-    cliquenetwork.cpp \
     cliquenetworkmanager.cpp \
     tournament.cpp \
     utils.cpp \
@@ -18,10 +17,10 @@ SOURCES += main.cpp \
     cliquemodule.cpp \
     cliquemoduleintelligence.cpp \
     classifier.cpp \
-    testmodule.cpp
+    testmodule.cpp \
+    cliquenetwork.cpp
 
 HEADERS += \
-    cliquenetwork.h \
     cliquenetworkmanager.h \
     tournament.h \
     utils.h \
@@ -30,4 +29,5 @@ HEADERS += \
     cliquemoduleintelligence.h \
     classifier.h \
     testmodule.h \
-    cltransformations.h
+    cltransformations.h \
+    cliquenetwork.h

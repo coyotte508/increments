@@ -68,13 +68,9 @@ int main(/*int argc, char *argv[]*/)
     }
 
     CliqueModule mod;
-    mod.setOwnership(true);
 
-    CliqueNetwork *nw1 = new CliqueNetwork(nw);
-    CliqueNetwork *nw2 = new CliqueNetwork(nw);
-
-    mod.addInputNetwork(nw1);
-    mod.addOutputNetwork(nw2);
+    mod.addInputNetwork();
+    mod.addOutputNetwork();
 
     CliqueModule identity(mod);
     identity.setName("identity");
@@ -102,13 +98,12 @@ int main(/*int argc, char *argv[]*/)
         cout << "In, Out: " << inSize << ", " << outSize << endl;
 
         CliqueModule base;
-        base.setOwnership(true);
 
         for (int i = 0; i < inSize; i++) {
-            base.addInputNetwork( new CliqueNetwork(nw) );
+            base.addInputNetwork();
         }
         for (int i = 0; i < outSize; i++) {
-            base.addOutputNetwork( new CliqueNetwork(nw) );
+            base.addOutputNetwork();
         }
 
         intel.clearData();
@@ -129,8 +124,8 @@ int main(/*int argc, char *argv[]*/)
 
                 gin() >> in >> out;
 
-                assert(in.size() == inSize);
-                assert(out.size() == outSize);
+                assert((int)in.size() == inSize);
+                assert((int)out.size() == outSize);
 
                 QList<Clique> inC, outC;
                 for (char c: in) {
@@ -146,7 +141,7 @@ int main(/*int argc, char *argv[]*/)
                 string data;
                 gin() >> data;
 
-                for (int i = 0; i +1 < data.size(); i++) {
+                for (int i = 0; i +1 < (int)data.size(); i++) {
                     intel.addInputOutput(QList<Clique>() << convert.clique(QString(1, data[i])), QList<Clique>() << convert.clique(QString(1, data[i+1])));
                 }
             } else if (s == "learn") {
@@ -156,7 +151,7 @@ int main(/*int argc, char *argv[]*/)
                 string test;
                 gin() >> test;
 
-                assert(test.size() == inSize);
+                assert((int)test.size() == inSize);
 
                 qDebug() << "testing " << QString::fromStdString(test);
                 QList<Clique> inC;

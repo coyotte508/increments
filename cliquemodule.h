@@ -10,31 +10,17 @@ class CliqueModule : public CliqueNetworkManager
 {
 public:
     CliqueModule(const QString &name = "");
-    CliqueModule(const CliqueModule &other);
-
-    CliqueModule &operator = (const CliqueModule &other);
-
     ~CliqueModule();
 
-    void addInputNetwork(CliqueNetwork *nw);
-    void addOutputNetwork(CliqueNetwork *nw);
-    CliqueNetwork *getInputNetwork(int i) const;
-    CliqueNetwork *getOutputNetwork(int i) const;
-
-    void setOwnership(bool ownership);
+    void addInputNetwork();
+    void addOutputNetwork();
 
     Clique getOutput(const Clique &input);
     virtual QList<Clique> getOutputs(const QList<Clique> &inputs);
 
     QList<cl::Transformation> getCombinationInputs(const QList<Clique> &inputs, const QList<Clique> &outputs, int firstOutput, const std::deque<int> &remainingOutputs);
 
-    /* More costly functions which will determine which cliques are connected
-     * to a specific input or output exactly */
-    QList<Clique> analyzeInput(const Clique &output);
-    QList<Clique> analyzeOutput(const Clique &input);
-
     void addModule(CliqueModule *module, QList<int> ins, QList<int> outs);
-    void clearOutputCliques();
     void linkInputOutput(const Clique &input, const Clique &output);
     void buildIdentity();
     void buildTarget(const Clique &dest);
@@ -46,17 +32,19 @@ public:
 
     QString name() const { return m_Name;}
     void setName(const QString &name) {m_Name = name;}
-private:
-    QList<CliqueNetwork*> inputs;
-    QList<CliqueNetwork*> outputs;
 
-    QHash<Clique, CliqueModule*> destinationModules;
+    CliqueModule *cloneDimensions() const;
+private:
+    QList<Clique> inputs;
+    QList<Clique> outputs;
+
+    QHash<Clique, Clique> inputsOutputs;
 
     cl::TransformationSet transformations;
 
-    bool ownership = false;
     bool _isTarget = false;
     bool _isIdentity = false;
+    Clique target;
     QString m_Name;
 };
 

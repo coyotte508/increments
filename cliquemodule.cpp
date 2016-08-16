@@ -11,68 +11,18 @@ CliqueModule::CliqueModule(const QString &name) : m_Name(name)
 
 }
 
-CliqueModule::CliqueModule(const CliqueModule &other)
-{
-    operator =(other);
-}
-
-CliqueModule &CliqueModule::operator = (const CliqueModule &other)
-{
-    this->ownership = true;
-    this->_isTarget = false;
-    this->_isIdentity = false;
-
-    QHash<CliqueNetwork*,CliqueNetwork*> assoc;
-
-    for (CliqueNetwork *nw : other.nws) {
-        assoc[nw] = new CliqueNetwork(*nw);
-    }
-
-    for (auto x: other.inputs) {
-        inputs.push_back(assoc[x]);
-    }
-    for (auto x: other.outputs) {
-        outputs.push_back(assoc[x]);
-    }
-    for (auto x: other.nws) {
-        nws.insert(assoc[x]);
-    }
-
-    return *this;
-}
 
 CliqueModule::~CliqueModule() {
-    if (ownership) {
-        qDeleteAll(nws);
-        nws.clear();
-    }
 }
 
-void CliqueModule::addInputNetwork(CliqueNetwork *nw)
+void CliqueModule::addInputNetwork()
 {
-    addNetwork(nw);
-    inputs.push_back(nw);
+    inputs.push_back(Clique());
 }
 
-void CliqueModule::addOutputNetwork(CliqueNetwork *nw)
+void CliqueModule::addOutputNetwork()
 {
-    addNetwork(nw);
-    outputs.push_back(nw);
-}
-
-CliqueNetwork *CliqueModule::getInputNetwork(int i) const
-{
-    return inputs[i];
-}
-
-CliqueNetwork *CliqueModule::getOutputNetwork(int i) const
-{
-    return outputs[i];
-}
-
-void CliqueModule::setOwnership(bool ownership)
-{
-    this->ownership = ownership;
+    outputs.push_back(Clique());
 }
 
 Clique CliqueModule::getOutput(const Clique &input)
@@ -80,16 +30,12 @@ Clique CliqueModule::getOutput(const Clique &input)
     if (_isIdentity) {
         return input;
     }
-
-    /* No safety checks done. Assumes reponsible caller */
-    auto cl = CliqueNetworkManager::getOutput(inputs.first(), outputs.first(), input);
-
-    if (destinationModules.contains(cl)) {
-        /* Possible infinite recursion */
-        cl = destinationModules[cl]->getOutput(input);
+    if (_isTarget) {
+        return target;
     }
 
-    return cl;
+    /* No safety checks done. Assumes reponsible caller */
+    return inputsOutputs.value(input);
 }
 
 QList<Clique> CliqueModule::getOutputs(const QList<Clique> &inputs)
@@ -102,27 +48,11 @@ QList<Clique> CliqueModule::getOutputs(const QList<Clique> &inputs)
         return transformations.transform(inputs);
     }
 
-    QList<Clique> ret;
-    int nouts = noutputs();
-    for (int i = 0; i < nouts; i++) {
-        ret.push_back(Clique());
+    if (this->inputs.size() == this->outputs.size() && this->inputs.size() == 1) {
+        return QList<Clique>() << (getOutput(inputs.first()));
     }
 
-    shutdown();
-
-    for (int i = 0; i < inputs.size(); i++) {
-        if (this->inputs.size() > i && !this->inputs[i]->isEmpty()) {
-            this->inputs[i]->activateClique(inputs[i]);
-        } else {
-            qDebug() << "Ignore input " << i;
-        }
-    }
-    iterate();
-    for (int i= 0; i < outputs.size(); i++) {
-        ret[i] = outputs[i]->activatedClique();
-    }
-
-    return ret;
+    assert(0);
 }
 
 QList<cl::Transformation> CliqueModule::getCombinationInputs(const QList<Clique> &inputs, const QList<Clique> &outputs, int firstOutput, const std::deque<int> &remainingOutputs)
@@ -188,72 +118,27 @@ QList<cl::Transformation> CliqueModule::getCombinationInputs(const QList<Clique>
     return ret;
 }
 
-QList<Clique> CliqueModule::analyzeInput(const Clique &output)
-{
-    QList<Clique> ret;
-    CliqueNetwork *src = inputs.first();
-    CliqueNetwork *dest = outputs.first();
-
-    for (const Clique &cl : src->allCliques()) {
-        if (src->isFullyConnectedTo(cl, dest, output)) {
-            ret.push_back(cl);
-        }
-    }
-
-    return ret;
-}
-
-QList<Clique> CliqueModule::analyzeOutput(const Clique &input)
-{
-    QList<Clique> ret;
-    CliqueNetwork *src = inputs.first();
-    CliqueNetwork *dest = outputs.first();
-
-    for (const Clique &cl : dest->allCliques()) {
-        if (src->isFullyConnectedTo(input, dest, cl)) {
-            ret.push_back(cl);
-        }
-    }
-
-    return ret;
-}
-
 void CliqueModule::addModule(CliqueModule *module, QList<int> ins, QList<int> outs)
 {
     transformations.push_back({ins, outs, module});
 }
 
-void CliqueModule::clearOutputCliques()
-{
-    for (auto nw : outputs) {
-        nw->clear();
-    }
-}
-
 void CliqueModule::linkInputOutput(const Clique &input, const Clique &output)
 {
-    inputs.first()->linkClique(input, outputs.first(), output);
+    inputsOutputs[input] = output;
 }
 
 void CliqueModule::buildIdentity()
 {
     _isIdentity = true;
-    assert(inputs.size() == 1 && outputs.size() == 1);
-
-    for (const Clique &c : inputs.first()->allCliques()) {
-        linkInputOutput(c, c);
-    }
 }
 
 void CliqueModule::buildTarget(const Clique &target)
 {
     assert(inputs.size() == 1 && outputs.size() == 1);
 
-    for (const Clique &c : inputs.first()->allCliques()) {
-        linkInputOutput(c, target);
-    }
-
     _isTarget = true;
+    this->target = target;
 }
 
 int CliqueModule::ninputs() const
@@ -280,4 +165,14 @@ int CliqueModule::noutputs() const
     }
 
     return maxIn;
+}
+
+CliqueModule * CliqueModule::cloneDimensions() const
+{
+    CliqueModule *cm = new CliqueModule();
+
+    cm->inputs = inputs;
+    cm->outputs = outputs;
+
+    return cm;
 }
