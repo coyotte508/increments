@@ -67,6 +67,11 @@ int main(/*int argc, char *argv[]*/)
         convert.learnWord(QString(1, c), cl);
     }
 
+    convert.learnWord("=", EQUAL);
+    convert.learnWord("<", INFERIOR);
+    convert.learnWord(">", SUPERIOR);
+    convert.learnWord("!", IMPOSSIBLE);
+
     CliqueModule mod;
 
     mod.addInputNetwork();

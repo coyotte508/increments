@@ -22,6 +22,11 @@ namespace cl {
     typedef QPair<int, int> coord;
 }
 
+static Clique INFERIOR = Clique() << 0 << 0 << 0 << 0 << 0 << 0 << 0 << 0;
+static Clique SUPERIOR = Clique() << 0 << 0 << 0 << 0 << 0 << 0 << 0 << 1;
+static Clique EQUAL = Clique() << 0 << 0 << 0 << 0 << 0 << 0 << 0 << 2;
+static Clique IMPOSSIBLE = Clique() << 0 << 0 << 0 << 0 << 0 << 0 << 0 << 3;
+
 class CliqueNetwork
 {
     typedef QPair<CliqueNetwork*, cl::coord> destlink;
