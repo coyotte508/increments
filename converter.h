@@ -12,13 +12,16 @@
 class Converter
 {
 public:
+    typedef QList<Clique> clword;
+    typedef QList<clword> clwords;
     Converter();
 
     QList<QList<int>> cliques() const;
     QList<QList<int>> cliques (const Clique &cl); //const;
-    void associate(const Clique &cl, const QList<Clique> &cls);
+    void associate(const Clique &cl, const clword &cls);
     QVariant word (const Clique &data) const;
-    QVariantList words (const QList<Clique> &data) const;
+    QVariantList words (const clword &data) const;
+    QVariantList words (const clwords &data) const;
     Clique clique(const QVariant &word) const;
     int count () const;
     void list() const;

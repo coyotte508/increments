@@ -11,6 +11,10 @@ CliqueNetwork::CliqueNetwork()
 
 }
 
+bool isOneDimensional(const Clique &)  {
+    return true;
+}
+
 CliqueNetwork::CliqueNetwork(const CliqueNetwork &other)
 {
     this->l = other.l;

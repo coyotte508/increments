@@ -1,6 +1,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <utility>
 #include <random>
 #include <QList>
 #include <QString>
@@ -41,6 +42,61 @@ QList<T> comb(T cont, int K)
         }
         ret.push_back(v);
     } while (std::prev_permutation(bitmask.begin(), bitmask.end()));
+
+    return ret;
+}
+
+template <class T>
+T left(T cont, int count)
+{
+    T ret;
+
+    for (auto x : cont) {
+        if (!count--) {
+            break;
+        }
+        ret.push_back(x);
+    }
+
+    return ret;
+}
+
+template <class T>
+T mid(T cont, int pos)
+{
+    T ret;
+
+    while (pos < cont.size()) {
+        ret.push_back(cont[pos++]);
+    }
+
+    return ret;
+}
+
+template<class T>
+QList<T> prepareList(int count, T sample)
+{
+    QList<T> rest;
+
+    while (count-- > 0) {
+        rest.push_back(sample);
+    }
+
+    return rest;
+}
+
+template <class T>
+QList<QList<T>> subIndexes(QList<QList<T>> list, QList<int> indexes)
+{
+    QList<QList<T>> ret;
+
+    for (auto l : list) {
+        QList<T> part;
+        for (int x : indexes) {
+            part.push_back(l[x]);
+        }
+        ret.push_back(part);
+    }
 
     return ret;
 }

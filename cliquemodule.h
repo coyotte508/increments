@@ -16,17 +16,19 @@ public:
     void addOutputNetwork();
 
     Clique getOutput(const Clique &input);
-    virtual QList<Clique> getOutputs(const QList<Clique> &inputs);
+    virtual QList<clword> getOutputs(const QList<clword> &inputs);
 
-    QList<cl::Transformation> getCombinationInputs(const QList<Clique> &inputs, const QList<Clique> &outputs, int firstOutput, const std::deque<int> &remainingOutputs);
+    //QList<cl::Transformation> getCombinationInputs(const QList<Clique> &inputs, const QList<Clique> &outputs, int firstOutput, const std::deque<int> &remainingOutputs);
 
     void addModule(CliqueModule *module, QList<int> ins, QList<int> outs);
     void linkInputOutput(const Clique &input, const Clique &output);
     void buildIdentity();
     void buildTarget(const Clique &dest);
 
-    virtual int ninputs () const ;
-    virtual int noutputs () const ;
+    virtual int getInputSize () const ;
+    virtual int getOutputSize () const ;
+    virtual int ninputs() const {return 1;}
+    virtual int noutputs() const {return 1;}
 
     bool isTarget() const { return _isTarget;}
 

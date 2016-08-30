@@ -65,22 +65,27 @@ CliqueModule* cl::TransformationSet::createModule() const
     return module;
 }
 
-QList<Clique> cl::TransformationSet::transform(const QList<Clique> &in)
+QList<clword> cl::TransformationSet::transform(const QList<clword> &in)
 {
-    QMap<int, Clique> results;
+    int noutputs = 0;
+    for (const cl::Transformation &tr : *this) {
+        noutputs += tr.outputs.size();
+    }
+
+    auto sampleResult = prepareList(noutputs, Clique());
+    auto results = prepareList(begin()->module->noutputs(), sampleResult); //todo: 1 -> number of actual outputs
 
     for (const cl::Transformation &tr : *this) {
-        QList<Clique> inputs;
-        for (int i : tr.inputs) {
-            inputs.push_back(in[i]);
-        }
-        auto outs = tr.module->getOutputs(inputs);
-        for (int j = 0; j < tr.outputs.size(); j++) {
-            results[tr.outputs[j]] = outs[j];
+        auto inputs = subIndexes(in, tr.inputs);
+        auto outputs = tr.module->getOutputs(inputs);
+        for (int i = 0 ; i < outputs.size(); i++) {
+            for (int j = 0; j < tr.outputs.size(); j++) {
+                results[i][tr.outputs[j]] = outputs[i][j];
+            }
         }
     }
 
-    return results.values();
+    return results;
 }
 
 QString cl::TransformationSet::toString() const
@@ -133,9 +138,14 @@ void CliqueModuleIntelligence::addAuxiliaryModule(CliqueModule *mod)
     auxiliaryModules.insert(mod);
 }
 
+void CliqueModuleIntelligence::addInputOutput(const inputlist &in, const outputlist &out)
+{
+    dataset.push_back(inputoutputlist(in, out));
+}
+
 void CliqueModuleIntelligence::addInputOutput(const input &in, const output &out)
 {
-    dataset.push_back(inputoutput(in, out));
+    dataset.push_back(inputoutputlist(inputlist() << in, inputlist() << out));
 }
 
 void CliqueModuleIntelligence::resolve()
@@ -220,11 +230,11 @@ void CliqueModuleIntelligence::collate()
 
     //debug
     for (int i = 0; i < dataset.size(); i++) {
-        qDebug() << toInt(convert.words(getInput(i))) << toInt(convert.words(test->getOutputs(getInput(i))));
+        qDebug() << toInt(convert.words(getInput(i))) << toInt(convert.words(test->getOutputs(QList<clword>() << getInput(i))));
     }
 }
 
-QList<Clique> CliqueModuleIntelligence::test(const QList<Clique> &input)
+QList<clword> CliqueModuleIntelligence::test(const QList<clword> &input)
 {
     auto module = newModules.back();
 
@@ -330,7 +340,7 @@ QList<CliqueModule*> CliqueModuleIntelligence::getNewModules()
 
  const CliqueModuleIntelligence::input & CliqueModuleIntelligence::getInput (int index) const
  {
-     return dataset[index].first;
+     return dataset[index].first[0];
  }
 
 void CliqueModuleIntelligence::mergeTargets(QList<TransformationSet> &winners)
@@ -373,20 +383,19 @@ void CliqueModuleIntelligence::mergeTargets(QList<TransformationSet> &winners)
             auto winner = winners[index];
             auto dataset = results[winner];
 
-            assert(t.inputs.size() == 1);
-            assert(t.outputs.size() == 1);
+            assert(isOneDimensional(t.inputs) && isOneDimensional(t.outputs));
 
             for (int i: dataset) {
-                auto key = this->dataset[i].first[t.inputs[0]];
-                auto val = this->dataset[i].second[t.outputs[0]];
+                auto key = this->dataset[i].first[0][t.inputs[0]];
+                auto val = this->dataset[i].second[0][t.outputs[0]];
 
                 if (recordedInputs.value(key, val) != val) {
                     return false;
                 }
             }
             for (int i: dataset) {
-                auto key = this->dataset[i].first[t.inputs[0]];
-                auto val = this->dataset[i].second[t.outputs[0]];
+                auto key = this->dataset[i].first[0][t.inputs[0]];
+                auto val = this->dataset[i].second[0][t.outputs[0]];
 
                 recordedInputs[key] = val;
             }
@@ -447,59 +456,84 @@ void CliqueModuleIntelligence::mergeTargets(QList<TransformationSet> &winners)
 void CliqueModuleIntelligence::processDataSet(int index)
 {
     const auto &data = dataset[index];
-    const input &in = data.first;
-    const output &out = data.second;
+    const inputlist inputs = data.first;
+    const outputlist outputs = data.second;;
 
     QSet<TransformationSet> sets;
-    std::deque<int> outputsRemaining;
-    for (int i = 0; i < out.size(); i++) {
+    QList<int> outputsRemaining;
+    for (int i = 0; i < outputs[0].size(); i++) {
         outputsRemaining.push_back(i);
+    }
+    QList<int> inputsRemaining;
+    for (int i = 0; i < inputs[0].size(); i++) {
+        inputsRemaining.push_back(i);
     }
 
     //qDebug() << convert.words(in) << " -> " << convert.words(out);
 
-    std::function<void(std::deque<int>, const TransformationSet&)> rec
-            = [&rec, &sets, index, &out, &in, this] (std::deque<int> rem, const TransformationSet &current) {
-        if (rem.size() == 0) {
+//    std::function<void(std::deque<int>, const TransformationSet&)> rec
+//            = [&rec, &sets, index, &out, &in, this] (std::deque<int> rem, const TransformationSet &current) {
+//        if (rem.size() == 0) {
+//            results[current].insert(index);
+//            //qDebug() << current;
+//            return;
+//        }
+
+//        std::sort(rem.begin(), rem.end());
+//        int firstOutput = rem.front();
+//        rem.erase(rem.begin());
+
+//        for (CliqueModule *module : auxiliaryModules) {
+//            QList<Transformation> transformations = module->getCombinationInputs(in, out, firstOutput, rem);
+
+//            for (const auto &transformation : transformations) {
+//                TransformationSet alt = current;
+//                alt.push_back(transformation);
+
+//                auto set = rem;
+
+//                //remove used outputs from the destination
+//                for (int output : transformation.outputs) {
+//                    auto it = std::find(set.begin(), set.end(), output);
+
+//                    assert(it != set.end() || output == firstOutput);
+
+//                    if (it != set.end()) {
+//                        set.erase(it);
+//                    }
+//                }
+
+//                rec(set, alt);
+//            }
+//        }
+//    };
+    //rec(outputsRemaining, TransformationSet());
+
+    std::function<void(QList<int>, QList<int>, const TransformationSet&)> rec
+            = [&] (QList<int> ins, QList<int> outs, const TransformationSet &current) {
+        if (outs.size() == 0) {
             results[current].insert(index);
-            //qDebug() << current;
             return;
         }
 
-        std::sort(rem.begin(), rem.end());
-        int firstOutput = rem.front();
-        rem.erase(rem.begin());
-
         for (CliqueModule *module : auxiliaryModules) {
-//            if (rem.size() == 2 && module->name() == "identity") {
-//                qDebug() << "interesting" << toInt(convert.words(in)) << toInt(convert.words(out));
-//            }
-//            if (rem.size() == 1 && module->name() == "test14") {
-//                qDebug() << "interesting" << toInt(convert.words(in)) << toInt(convert.words(out));
-//            }
-            QList<Transformation> transformations = module->getCombinationInputs(in, out, firstOutput, rem);
-
-            for (const auto &transformation : transformations) {
+            if (ins.size() < module->getInputSize() || outs.size() < module->getOutputSize()) {
+                continue;
+            }
+            auto inIndexes = left(ins, module->getInputSize());
+            auto outIndexes = left(outs, module->getOutputSize());
+            auto partialInputs = subIndexes(inputs, inIndexes);
+            auto partialOutputs = subIndexes(outputs, outIndexes);
+            if (module->getOutputs(partialInputs) == partialOutputs) {
                 TransformationSet alt = current;
-                alt.push_back(transformation);
+                ins = mid(ins, module->getInputSize());
+                outs = mid(outs, module->getOutputSize());
+                alt.push_back(Transformation{ins,outs, module});
 
-                auto set = rem;
-
-                //remove used outputs from the destination
-                for (int output : transformation.outputs) {
-                    auto it = std::find(set.begin(), set.end(), output);
-
-                    assert(it != set.end() || output == firstOutput);
-
-                    if (it != set.end()) {
-                        set.erase(it);
-                    }
-                }
-
-                rec(set, alt);
+                rec(ins, outs, alt);
             }
         }
     };
 
-    rec(outputsRemaining, TransformationSet());
+    rec(inputsRemaining, outputsRemaining, TransformationSet());
 }

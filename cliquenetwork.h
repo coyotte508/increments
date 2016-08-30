@@ -6,6 +6,14 @@
 #include <QSet>
 
 typedef QList<int> Clique;
+typedef QList<Clique> clword;
+
+bool isOneDimensional(const Clique &);
+
+template<class T>
+bool isOneDimensional(const QList<T> &l) {
+    return l.size() == 1 && isOneDimensional(l[0]);
+}
 
 template <class T>
 inline uint qHash(const QList<T> &key, uint seed = 0)

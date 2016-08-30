@@ -163,7 +163,7 @@ int main(/*int argc, char *argv[]*/)
                 for (char c: test) {
                     inC << convert.clique(QString(1, c));
                 }
-                qDebug() << toInt(convert.words(intel.test(inC)));
+                qDebug() << toInt(convert.words(intel.test(QList<clword>() << inC)));
             } else if (s == "next") {
 
                 break;

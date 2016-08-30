@@ -13,12 +13,12 @@ void TestModule::setCharacteristics(const QList<Classifier::Characteristics> &pr
     this->modules = modules;
 }
 
-QList<Clique> TestModule::getOutputs(const QList<Clique> &inputs)
+QList<clword> TestModule::getOutputs(const QList<clword> &inputs)
 {
     assert(!modules.empty() > 0);
 
     for (int i = protos.size()-1; i > 0; i--) {
-        if (matchCharacteristics(inputs, protos[i])) {
+        if (matchCharacteristics(inputs[0], protos[i])) {
             qDebug() << "using " << modules[i]->name();
             return modules[i]->getOutputs(inputs);
         }
@@ -42,17 +42,17 @@ bool TestModule::matchCharacteristics(const QList<Clique> &inputs, const Classif
     return true;
 }
 
-int TestModule::noutputs() const {
+int TestModule::getOutputSize() const {
     if (!modules.empty()) {
-        return modules[0]->noutputs();
+        return modules[0]->getOutputSize();
     }
     return 0;
 }
 
-int TestModule::ninputs() const {
+int TestModule::getInputSize() const {
     int maxIn = 0;
     for (CliqueModule *m : modules) {
-        maxIn = std::max(m->ninputs(), maxIn);
+        maxIn = std::max(m->getInputSize(), maxIn);
     }
 
     return maxIn;

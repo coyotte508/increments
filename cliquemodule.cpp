@@ -38,7 +38,7 @@ Clique CliqueModule::getOutput(const Clique &input)
     return inputsOutputs.value(input);
 }
 
-QList<Clique> CliqueModule::getOutputs(const QList<Clique> &inputs)
+QList<clword> CliqueModule::getOutputs(const QList<clword> &inputs)
 {
     if (_isIdentity) {
         return inputs;
@@ -48,75 +48,75 @@ QList<Clique> CliqueModule::getOutputs(const QList<Clique> &inputs)
         return transformations.transform(inputs);
     }
 
-    if (this->inputs.size() == this->outputs.size() && this->inputs.size() == 1) {
-        return QList<Clique>() << (getOutput(inputs.first()));
+    if (isOneDimensional(this->inputs) && isOneDimensional(this->outputs)) {
+        return QList<clword>() << (clword() << getOutput(inputs[0].first()));
     }
 
     assert(0);
 }
 
-QList<cl::Transformation> CliqueModule::getCombinationInputs(const QList<Clique> &inputs, const QList<Clique> &outputs, int firstOutput, const std::deque<int> &remainingOutputs)
-{
-    QList<cl::Transformation> ret;
+//QList<cl::Transformation> CliqueModule::getCombinationInputs(const QList<Clique> &inputs, const QList<Clique> &outputs, int firstOutput, const std::deque<int> &remainingOutputs)
+//{
+//    QList<cl::Transformation> ret;
 
-    //qDebug() << "Process: " << toInt(convert.words(inputs)) << toInt(convert.words(outputs));
+//    //qDebug() << "Process: " << toInt(convert.words(inputs)) << toInt(convert.words(outputs));
 
-    /* k correponds to the number of additional outputs */
-    for (int k = 0; k < int(remainingOutputs.size()) + 1 && k < noutputs(); k++) {
-        auto combs = comb(remainingOutputs, k);
+//    /* k correponds to the number of additional outputs */
+//    for (int k = 0; k < int(remainingOutputs.size()) + 1 && k < noutputs(); k++) {
+//        auto combs = comb(remainingOutputs, k);
 
-        if (k == 0) {
-            std::deque<int> simple;
-            simple.push_front(firstOutput);
-            combs.push_back(simple);
-        } else {
-            for (auto &el : combs) {
-                el.push_front(firstOutput);
-            }
-        }
+//        if (k == 0) {
+//            std::deque<int> simple;
+//            simple.push_front(firstOutput);
+//            combs.push_back(simple);
+//        } else {
+//            for (auto &el : combs) {
+//                el.push_front(firstOutput);
+//            }
+//        }
 
-        std::deque<int> possibleInputs;
-        for (int i = 0; i < inputs.size(); i++) {
-            possibleInputs.push_back(i);
-        }
-        auto combsIn = comb(possibleInputs, ninputs());
+//        std::deque<int> possibleInputs;
+//        for (int i = 0; i < inputs.size(); i++) {
+//            possibleInputs.push_back(i);
+//        }
+//        auto combsIn = comb(possibleInputs, ninputs());
 
-        for (auto elIn : combsIn) {
-            do {
-                QList<Clique> testIn;
-                for (int i : elIn) testIn.push_back(inputs[i]);
+//        for (auto elIn : combsIn) {
+//            do {
+//                QList<Clique> testIn;
+//                for (int i : elIn) testIn.push_back(inputs[i]);
 
-                QList<Clique> res = getOutputs(testIn);
+//                QList<Clique> res = getOutputs(testIn);
 
-                //qDebug() << "Inputs: " << toInt(convert.words(testIn)) << " outputs " << toInt(convert.words(res));
+//                //qDebug() << "Inputs: " << toInt(convert.words(testIn)) << " outputs " << toInt(convert.words(res));
 
-                for (auto elOut : combs) {
-                    do {
-                        QList<Clique> shouldOut;
+//                for (auto elOut : combs) {
+//                    do {
+//                        QList<Clique> shouldOut;
 
-                        for (unsigned i = 0; i < elOut.size(); i++) {
-                            shouldOut.push_back(outputs[elOut[i]]);
-                        }
+//                        for (unsigned i = 0; i < elOut.size(); i++) {
+//                            shouldOut.push_back(outputs[elOut[i]]);
+//                        }
 
-                        if (shouldOut == res) {
-                            //qDebug() << toInt(convert.words(shouldOut)) << "matching";
-                            cl::Transformation tr;
-                            tr.module = this;
-                            for (int i : elIn) tr.inputs << i;
-                            for (int i : elOut) tr.outputs << i;
+//                        if (shouldOut == res) {
+//                            //qDebug() << toInt(convert.words(shouldOut)) << "matching";
+//                            cl::Transformation tr;
+//                            tr.module = this;
+//                            for (int i : elIn) tr.inputs << i;
+//                            for (int i : elOut) tr.outputs << i;
 
-                            ret.push_back(tr);
-                        } else {
-                            //qDebug() << toInt(convert.words(shouldOut)) << "not matching";
-                        }
-                    } while (std::next_permutation(elOut.begin(), elOut.end()));
-                }
-            } while (std::next_permutation(elIn.begin(), elIn.end()));
-        }
-    }
+//                            ret.push_back(tr);
+//                        } else {
+//                            //qDebug() << toInt(convert.words(shouldOut)) << "not matching";
+//                        }
+//                    } while (std::next_permutation(elOut.begin(), elOut.end()));
+//                }
+//            } while (std::next_permutation(elIn.begin(), elIn.end()));
+//        }
+//    }
 
-    return ret;
-}
+//    return ret;
+//}
 
 void CliqueModule::addModule(CliqueModule *module, QList<int> ins, QList<int> outs)
 {
@@ -141,7 +141,7 @@ void CliqueModule::buildTarget(const Clique &target)
     this->target = target;
 }
 
-int CliqueModule::ninputs() const
+int CliqueModule::getInputSize() const
 {
     int maxIn = inputs.size();
 
@@ -154,7 +154,7 @@ int CliqueModule::ninputs() const
     return maxIn;
 }
 
-int CliqueModule::noutputs() const
+int CliqueModule::getOutputSize() const
 {
     int maxIn = outputs.size();
 

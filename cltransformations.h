@@ -27,7 +27,8 @@ namespace cl {
     class TransformationSet : public QList<Transformation> {
     public:
         CliqueModule *createModule() const;
-        QList<Clique> transform(const QList<Clique> &in);
+        /* Applies inputs to modules and gets outputs */
+        QList<clword> transform(const QList<clword> &in);
 
         QString toString() const;
     };

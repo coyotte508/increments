@@ -28,20 +28,24 @@ public:
 
     typedef QList<Clique> input;
     typedef QList<Clique> output;
+    typedef QList<input> inputlist;
+    typedef QList<output> outputlist;
     typedef QPair<input, output> inputoutput;
+    typedef QPair<inputlist, outputlist> inputoutputlist;
 
     CliqueModuleIntelligence();
     ~CliqueModuleIntelligence();
 
     void setBaseModel(CliqueModule *mod);
     void addAuxiliaryModule(CliqueModule *mod);
+    void addInputOutput(const inputlist &in, const outputlist &out);
     void addInputOutput(const input &in, const output &out);
 
     void resolve();
     void collate();
     void clearData();
 
-    QList<Clique> test(const QList<Clique> &input);
+    QList<clword> test(const QList<clword> &input);
 
     CliqueModule *popModule();
     QList<CliqueModule*> getNewModules();
@@ -54,7 +58,7 @@ protected:
     void trimResults(const QList<cl::TransformationSet> &winners); //trim results to only what's necessary
     QList<cl::TransformationSet> winners();
 private:
-    QList<inputoutput> dataset;
+    QList<inputoutputlist> dataset;
     CliqueModule base;
 
     QSet<CliqueModule *> auxiliaryModules;

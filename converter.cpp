@@ -54,6 +54,21 @@ QVariantList Converter::words(const QList<Clique> &data) const
     return ret;
 }
 
+QVariantList Converter::words(const clwords &data) const
+{
+    QVariantList ret;
+
+    int first = 0;
+    for (const auto &cl: data) {
+        if (first++) {
+            ret.append(",");
+        }
+        ret.append(words(cl));
+    }
+
+    return ret;
+}
+
 Clique Converter::clique(const QVariant &word) const
 {
     assert(data.contains(word));
