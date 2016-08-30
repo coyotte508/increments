@@ -526,10 +526,13 @@ void CliqueModuleIntelligence::processDataSet(int index)
             auto partialOutputs = subIndexes(outputs, outIndexes);
             if (module->getOutputs(partialInputs) == partialOutputs) {
                 TransformationSet alt = current;
+
+                alt.push_back(Transformation{left(ins, module->getInputSize()),
+                                             left(outs, module->getInputSize()),
+                                             module});
+
                 ins = mid(ins, module->getInputSize());
                 outs = mid(outs, module->getOutputSize());
-                alt.push_back(Transformation{ins,outs, module});
-
                 rec(ins, outs, alt);
             }
         }
