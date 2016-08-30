@@ -18,7 +18,8 @@ SOURCES += main.cpp \
     cliquemoduleintelligence.cpp \
     classifier.cpp \
     testmodule.cpp \
-    cliquenetwork.cpp
+    cliquenetwork.cpp \
+    comparer.cpp
 
 HEADERS += \
     cliquenetworkmanager.h \
@@ -30,4 +31,5 @@ HEADERS += \
     classifier.h \
     testmodule.h \
     cltransformations.h \
-    cliquenetwork.h
+    cliquenetwork.h \
+    comparer.h

@@ -7,6 +7,7 @@ class CliqueNetworkManager
 {
 public:
     CliqueNetworkManager();
+    virtual ~CliqueNetworkManager(){}
 
     void addNetwork(CliqueNetwork *nw);
     void iterate();

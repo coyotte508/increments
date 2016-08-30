@@ -113,6 +113,16 @@ CliqueModuleIntelligence::CliqueModuleIntelligence()
 
 }
 
+CliqueModuleIntelligence::~CliqueModuleIntelligence()
+{
+    for (CliqueModule *mod : auxiliaryModules) {
+        if (mod->isParent(this)) {
+            delete mod;
+        }
+    }
+    auxiliaryModules.clear();
+}
+
 void CliqueModuleIntelligence::setBaseModel(CliqueModule *mod)
 {
     base = CliqueModule(*mod);
@@ -182,6 +192,7 @@ void CliqueModuleIntelligence::collate()
     /* First merge winners into one module */
     for (const auto &winner : winners) {
         CliqueModule *module = winner.createModule();
+        module->setParent(this);
         addAuxiliaryModule(module);
         modules.push_back(module);
         newModules.push_back(module);
@@ -410,6 +421,7 @@ void CliqueModuleIntelligence::mergeTargets(QList<TransformationSet> &winners)
         }
 
         CliqueModule *disciple = winner.module->cloneDimensions();
+        disciple->setParent(this);
         disciple->setName(QString("internal%1").arg(auxiliaryModules.size()));
 
         for (const Clique &c: recordedInputs.keys()) {

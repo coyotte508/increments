@@ -31,6 +31,7 @@ public:
     typedef QPair<input, output> inputoutput;
 
     CliqueModuleIntelligence();
+    ~CliqueModuleIntelligence();
 
     void setBaseModel(CliqueModule *mod);
     void addAuxiliaryModule(CliqueModule *mod);

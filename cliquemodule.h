@@ -33,6 +33,16 @@ public:
     QString name() const { return m_Name;}
     void setName(const QString &name) {m_Name = name;}
 
+    template<class T>
+    void setParent(T* ptr) {
+        this->parent = ptr;
+    }
+
+    template <class T>
+    bool isParent(T* ptr) {
+        return parent == ptr;
+    }
+
     CliqueModule *cloneDimensions() const;
 private:
     QList<Clique> inputs;
@@ -44,6 +54,7 @@ private:
 
     bool _isTarget = false;
     bool _isIdentity = false;
+    void *parent = nullptr;
     Clique target;
     QString m_Name;
 };
