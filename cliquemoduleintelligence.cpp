@@ -459,7 +459,6 @@ void CliqueModuleIntelligence::processDataSet(int index)
     const inputlist inputs = data.first;
     const outputlist outputs = data.second;;
 
-    QSet<TransformationSet> sets;
     QList<int> outputsRemaining;
     for (int i = 0; i < outputs[0].size(); i++) {
         outputsRemaining.push_back(i);
@@ -531,9 +530,9 @@ void CliqueModuleIntelligence::processDataSet(int index)
                                              left(outs, module->getInputSize()),
                                              module});
 
-                ins = mid(ins, module->getInputSize());
-                outs = mid(outs, module->getOutputSize());
-                rec(ins, outs, alt);
+                auto newIns = mid(ins, module->getInputSize());
+                auto newOuts = mid(outs, module->getOutputSize());
+                rec(newIns, newOuts, alt);
             }
         }
     };
